@@ -1,0 +1,50 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.3, pytest-9.1.1, pluggy-1.7.0 -- /usr/bin/python3
+cachedir: .pytest_cache
+rootdir: /opt/ai-builder/workspaces/algolab-paper-trial-20261019-183015/algo-lab-unified-trial
+configfile: pyproject.toml
+plugins: anyio-4.15.1, platformdirs-4.13.3
+collecting ... collected 40 items
+
+tests/unit/test_capital_reservations.py::TestCapitalReservationService::test_successful_reservation PASSED [  2%]
+tests/unit/test_capital_reservations.py::TestCapitalReservationService::test_insufficient_funds_rejection PASSED [  5%]
+tests/unit/test_capital_reservations.py::TestCapitalReservationService::test_idempotent_replay PASSED [  7%]
+tests/unit/test_capital_reservations.py::TestCapitalReservationService::test_release_and_consume_lifecycle PASSED [ 10%]
+tests/unit/test_eod_reconciliation.py::TestEODReconciler::test_perfectly_balanced_session PASSED [ 12%]
+tests/unit/test_eod_reconciliation.py::TestEODReconciler::test_detect_balance_sheet_imbalance PASSED [ 15%]
+tests/unit/test_gateway_lifecycle.py::TestBrokerGatewayLifecycle::test_idempotent_order_creation PASSED [ 17%]
+tests/unit/test_gateway_lifecycle.py::TestBrokerGatewayLifecycle::test_submission_timeout_and_uncertainty_resolution PASSED [ 20%]
+tests/unit/test_gateway_lifecycle.py::TestBrokerGatewayLifecycle::test_fill_deduplication PASSED [ 22%]
+tests/unit/test_gateway_lifecycle.py::TestBrokerGatewayLifecycle::test_complete_fill_transition PASSED [ 25%]
+tests/unit/test_gateway_lifecycle.py::TestBrokerGatewayLifecycle::test_cancel_timeout_and_uncertainty_resolution_confirmed PASSED [ 27%]
+tests/unit/test_gateway_lifecycle.py::TestBrokerGatewayLifecycle::test_cancel_timeout_and_uncertainty_resolution_absent_unfilled PASSED [ 30%]
+tests/unit/test_gateway_lifecycle.py::TestBrokerGatewayLifecycle::test_cancel_timeout_and_uncertainty_resolution_absent_partially_filled PASSED [ 32%]
+tests/unit/test_gateway_lifecycle.py::TestBrokerGatewayLifecycle::test_cancel_unknown_late_fill_transitions_to_filled PASSED [ 35%]
+tests/unit/test_scanner_strategy.py::TestIntradayMarketScanner::test_scanner_requires_minimum_history_bars PASSED [ 37%]
+tests/unit/test_scanner_strategy.py::TestIntradayMarketScanner::test_scanner_rejects_wide_spread PASSED [ 40%]
+tests/unit/test_scanner_strategy.py::TestIntradayMarketScanner::test_scanner_rejects_low_rvol PASSED [ 42%]
+tests/unit/test_scanner_strategy.py::TestIntradayMarketScanner::test_scanner_detects_bullish_breakout PASSED [ 45%]
+tests/unit/test_scanner_strategy.py::TestIntradayMarketScanner::test_scanner_detects_bearish_breakout PASSED [ 47%]
+tests/unit/test_scanner_strategy.py::TestMomentumBreakoutStrategy::test_strategy_generates_long_signal_with_2_to_1_rr PASSED [ 50%]
+tests/unit/test_scanner_strategy.py::TestMomentumBreakoutStrategy::test_strategy_generates_short_signal_with_2_to_1_rr PASSED [ 52%]
+tests/unit/test_scanner_strategy.py::TestMomentumBreakoutStrategy::test_strategy_rejects_neutral_bias PASSED [ 55%]
+tests/unit/test_security_guards.py::TestPaperOnlyInvariants::test_pass_on_default_clean_invariants PASSED [ 57%]
+tests/unit/test_security_guards.py::TestPaperOnlyInvariants::test_reject_live_trading_true PASSED [ 60%]
+tests/unit/test_security_guards.py::TestPaperOnlyInvariants::test_reject_real_broker_execution_true PASSED [ 62%]
+tests/unit/test_security_guards.py::TestPaperOnlyInvariants::test_reject_real_money_risk_non_zero PASSED [ 65%]
+tests/unit/test_security_guards.py::TestPaperOnlyInvariants::test_reject_paper_broker_only_false PASSED [ 67%]
+tests/unit/test_security_guards.py::TestPaperOnlyInvariants::test_reject_malformed_risk_value PASSED [ 70%]
+tests/unit/test_security_guards.py::TestConfigurationValidation::test_reject_contradictory_live_trading_flag PASSED [ 72%]
+tests/unit/test_security_guards.py::TestConfigurationValidation::test_reject_live_execution_environment PASSED [ 75%]
+tests/unit/test_security_guards.py::TestBrokerVenueRejection::test_allow_paper_venue PASSED [ 77%]
+tests/unit/test_security_guards.py::TestBrokerVenueRejection::test_reject_live_zerodha_venue PASSED [ 80%]
+tests/unit/test_security_guards.py::TestBrokerVenueRejection::test_reject_live_angelone_venue PASSED [ 82%]
+tests/unit/test_security_guards.py::TestOrderDispatchSafetyGuard::test_reject_order_without_risk_approval PASSED [ 85%]
+tests/unit/test_security_guards.py::TestOrderDispatchSafetyGuard::test_accept_order_with_risk_approval PASSED [ 87%]
+tests/unit/test_security_guards.py::TestOrderDispatchSafetyGuard::test_reject_real_money_intent PASSED [ 90%]
+tests/unit/test_security_guards.py::TestWorkspaceContainment::test_allow_path_inside_workspace PASSED [ 92%]
+tests/unit/test_security_guards.py::TestWorkspaceContainment::test_block_canonical_algopro_path PASSED [ 95%]
+tests/unit/test_security_guards.py::TestWorkspaceContainment::test_block_canonical_all_in_one_path PASSED [ 97%]
+tests/unit/test_security_guards.py::TestWorkspaceContainment::test_block_path_escaping_workspace PASSED [100%]
+
+============================== 40 passed in 0.08s ==============================

@@ -1,0 +1,31 @@
+HTTP Error 404: {"quoteSummary":{"result":null,"error":{"code":"Not Found","description":"Quote not found for symbol: TATAMOTORS.NS"}}}
+$TATAMOTORS.NS: No data found, symbol may be delisted
+
+1 Failed download:
+['TATAMOTORS.NS']: No data found, symbol may be delisted
+================================================================================
+  ALGO LAB: NSE STOCK SCANNER RIGOROUS EMPIRICAL VALIDATION
+  Execution Time: 2026-10-19 18:39:13 IST
+=================================================================
+Fetching recent 5-minute bars for 10 symbols via yfinance...
+
+=========================================================================================================
+Symbol     | Status   |   LTP (₹) |  RVOL |  VWAP (₹) |  Turnover | Setup Name                 |  Allocated
+---------------------------------------------------------------------------------------------------------
+RELIANCE   | QUALIFIED |   1202.00 |  1.68 |   1212.10 | ₹1806.0Cr | ORB_15M_BEARISH_BREAKDOWN  | ₹24,040.00
+HDFCBANK   | QUALIFIED |    712.00 |  1.94 |    712.11 | ₹2147.8Cr | ORB_15M_BEARISH_BREAKDOWN  | ₹24,920.00
+INFY       | QUALIFIED |   1130.70 |  1.97 |   1136.72 | ₹1396.3Cr | ORB_15M_BEARISH_BREAKDOWN  | ₹24,875.40
+ICICIBANK  | QUALIFIED |   1381.00 |  1.30 |   1387.92 | ₹2870.5Cr | ORB_15M_BEARISH_BREAKDOWN  | ₹24,858.00
+BHARTIARTL | QUALIFIED |   1875.20 |  1.38 |   1882.90 | ₹1532.4Cr | ORB_15M_BEARISH_BREAKDOWN  | ₹24,377.60
+TCS        | REJECTED |   2460.90 |  0.68 |   2469.93 | ₹1889.0Cr | NONE                       |      ₹0.00
+   └── Rejection Reasons: LOW_RVOL: 5m relative volume 0.68x < 1.2x threshold; NO_TECHNICAL_TRIGGER: Price within opening range without VWAP breakout
+SBIN       | REJECTED |    973.70 |  0.77 |    972.86 | ₹1408.6Cr | NONE                       |      ₹0.00
+   └── Rejection Reasons: LOW_RVOL: 5m relative volume 0.77x < 1.2x threshold; NO_TECHNICAL_TRIGGER: Price within opening range without VWAP breakout
+ITC        | REJECTED |    260.80 |  2.19 |    261.41 | ₹ 292.1Cr | ORB_15M_BEARISH_BREAKDOWN  |      ₹0.00
+   └── Rejection Reasons: LOW_VOLATILITY: ATR 0.32 is only 0.12% of price (< 0.15%)
+LT         | REJECTED |   3661.90 |  0.65 |   3658.24 | ₹ 834.8Cr | NONE                       |      ₹0.00
+   └── Rejection Reasons: LOW_RVOL: 5m relative volume 0.65x < 1.2x threshold; LOW_VOLATILITY: ATR 5.31 is only 0.15% of price (< 0.15%); NO_TECHNICAL_TRIGGER: Price within opening range without VWAP breakout
+TATAMOTORS | REJECTED |      0.00 |  0.00 |      0.00 | ₹   0.0Cr | NONE                       |      ₹0.00
+   └── Rejection Reasons: INSUFFICIENT_HISTORY: Only 0 bars available (min 25)
+
+[✓] Saved detailed scanner validation output to: /opt/ai-builder/workspaces/algolab-paper-trial-20261019-183015/reports/scanner_validation_results.json

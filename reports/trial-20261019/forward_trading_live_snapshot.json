@@ -1,0 +1,46 @@
+{
+  "timestamp": "2026-10-19T18:56:43.436952",
+  "cycle_count": 13,
+  "mode": "FORWARD_PAPER_TRADING",
+  "data_feed": "Yahoo Finance (Real-Time 5m NSE)",
+  "safety_controls": {
+    "ALLOW_LIVE_TRADING": false,
+    "PAPER_BROKER_ONLY": true,
+    "REAL_MONEY_RISK_PAISE": 0
+  },
+  "financials": {
+    "initial_capital_inr": 100000.0,
+    "cash_inr": 100000.0,
+    "current_equity_inr": 100000.0,
+    "gross_realized_pnl_inr": 0.0,
+    "total_statutory_fees_inr": 0.0,
+    "total_slippage_inr": 0.0,
+    "total_friction_inr": 0.0,
+    "net_realized_pnl_inr": 0.0
+  },
+  "open_positions": [],
+  "completed_trades_count": 0,
+  "completed_trades": [],
+  "latest_quotes": {
+    "RELIANCE": {
+      "close": 1202.0,
+      "volume": 429107,
+      "timestamp": "2026-10-19T15:25:00+05:30"
+    },
+    "INFY": {
+      "close": 1130.7,
+      "volume": 379898,
+      "timestamp": "2026-10-19T15:25:00+05:30"
+    },
+    "TCS": {
+      "close": 2460.9,
+      "volume": 74620,
+      "timestamp": "2026-10-19T15:25:00+05:30"
+    },
+    "HDFCBANK": {
+      "close": 712.0,
+      "volume": 1061894,
+      "timestamp": "2026-10-19T15:25:00+05:30"
+    }
+  }
+}

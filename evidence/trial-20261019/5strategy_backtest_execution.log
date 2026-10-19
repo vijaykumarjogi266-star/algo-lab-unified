@@ -1,0 +1,30 @@
+=================================================================
+  ALGO LAB: 5-STRATEGY 60-DAY EMPIRICAL REPRODUCTION & COMPARISON
+=================================================================
+Downloading 60-day 5-minute bars for ['RELIANCE.NS', 'INFY.NS', 'TCS.NS', 'HDFCBANK.NS']...
+  RELIANCE: 4391 bars from 2026-07-24 09:15:00+05:30 to 2026-10-19 15:25:00+05:30
+  INFY: 4385 bars from 2026-07-24 09:15:00+05:30 to 2026-10-19 15:25:00+05:30
+  TCS: 4381 bars from 2026-07-24 09:15:00+05:30 to 2026-10-19 15:25:00+05:30
+  HDFCBANK: 4390 bars from 2026-07-24 09:15:00+05:30 to 2026-10-19 15:25:00+05:30
+
+Evaluating Strategy: VWAP_MEAN_REVERSION...
+
+Evaluating Strategy: PIVOT_R1_BREAKOUT...
+
+Evaluating Strategy: OPENING_RANGE_BREAKOUT...
+
+Evaluating Strategy: RED_TO_GREEN...
+
+Evaluating Strategy: FIRST_PULLBACK...
+
+===================================================================================================================
+Strategy Name             | Trades |  Win % |   Gross PnL |   Friction |     Net PnL |    PF |  Exp (₹) | Max DD %
+-------------------------------------------------------------------------------------------------------------------
+VWAP_MEAN_REVERSION       |     17 |  52.9% | ₹  1,326.70 | ₹   607.80 | ₹    718.90 |  2.79 | ₹  42.29 |    0.42%
+PIVOT_R1_BREAKOUT         |     19 |  21.1% | ₹   -418.56 | ₹   677.05 | ₹ -1,095.61 |  0.51 | ₹ -57.66 |    1.14%
+OPENING_RANGE_BREAKOUT    |     78 |  38.5% | ₹   -693.33 | ₹ 2,797.04 | ₹ -3,490.37 |  0.88 | ₹ -44.75 |    3.96%
+RED_TO_GREEN              |     14 |  42.9% | ₹    460.10 | ₹   498.33 | ₹    -38.23 |  1.61 | ₹  -2.73 |    0.51%
+FIRST_PULLBACK            |    201 |  34.3% | ₹     42.86 | ₹ 7,196.67 | ₹ -7,153.81 |  1.00 | ₹ -35.59 |    7.40%
+===================================================================================================================
+
+[✓] Saved 5-strategy comparative results to: /opt/ai-builder/workspaces/algolab-paper-trial-20261019-183015/reports/5strategy_empirical_comparison.json

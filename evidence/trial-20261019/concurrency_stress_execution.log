@@ -1,0 +1,199 @@
+{"time": "2026-10-19 18:36:57,217", "level": "INFO", "name": "src.capitalreservation.service", "message": "Capital reserved: reservation_id RES-CONC-003, account PAPER_ACC_CONC, amount 20000.00, available after 80000.00"}
+{"time": "2026-10-19 18:36:57,221", "level": "INFO", "name": "src.capitalreservation.service", "message": "Capital reserved: reservation_id RES-CONC-001, account PAPER_ACC_CONC, amount 20000.00, available after 60000.00"}
+{"time": "2026-10-19 18:36:57,226", "level": "INFO", "name": "src.capitalreservation.service", "message": "Capital reserved: reservation_id RES-CONC-004, account PAPER_ACC_CONC, amount 20000.00, available after 40000.00"}
+{"time": "2026-10-19 18:36:57,238", "level": "INFO", "name": "src.capitalreservation.service", "message": "Capital reserved: reservation_id RES-CONC-005, account PAPER_ACC_CONC, amount 20000.00, available after 20000.00"}
+{"time": "2026-10-19 18:36:57,252", "level": "INFO", "name": "src.capitalreservation.service", "message": "Capital reserved: reservation_id RES-CONC-002, account PAPER_ACC_CONC, amount 20000.00, available after 0.00"}
+{"time": "2026-10-19 18:36:57,270", "level": "WARNING", "name": "src.capitalreservation.service", "message": "INSUFFICIENT FUNDS: Account PAPER_ACC_CONC requested 20000.00, available 0.00 (base 100000.00 - active 100000.0)"}
+{"time": "2026-10-19 18:36:57,270", "level": "WARNING", "name": "src.capitalreservation.service", "message": "INSUFFICIENT FUNDS: Account PAPER_ACC_CONC requested 20000.00, available 0.00 (base 100000.00 - active 100000.0)"}
+{"time": "2026-10-19 18:36:57,271", "level": "WARNING", "name": "src.capitalreservation.service", "message": "INSUFFICIENT FUNDS: Account PAPER_ACC_CONC requested 20000.00, available 0.00 (base 100000.00 - active 100000.0)"}
+{"time": "2026-10-19 18:36:57,272", "level": "WARNING", "name": "src.capitalreservation.service", "message": "INSUFFICIENT FUNDS: Account PAPER_ACC_CONC requested 20000.00, available 0.00 (base 100000.00 - active 100000.0)"}
+{"time": "2026-10-19 18:36:57,297", "level": "WARNING", "name": "src.capitalreservation.service", "message": "INSUFFICIENT FUNDS: Account PAPER_ACC_CONC requested 20000.00, available 0.00 (base 100000.00 - active 100000.0)"}
+{"time": "2026-10-19 18:36:57,321", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-000 state changed: CREATED -> RISK_RESERVED (Risk capital reserved)"}
+{"time": "2026-10-19 18:36:57,323", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-000 state changed: RISK_RESERVED -> SUBMITTED (Submitted to simulator)"}
+{"time": "2026-10-19 18:36:57,325", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-000 state changed: SUBMITTED -> OPEN (Working at venue)"}
+{"time": "2026-10-19 18:36:57,341", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-001 state changed: CREATED -> RISK_RESERVED (Risk capital reserved)"}
+{"time": "2026-10-19 18:36:57,344", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-001 state changed: RISK_RESERVED -> SUBMITTED (Submitted to simulator)"}
+{"time": "2026-10-19 18:36:57,348", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-001 state changed: SUBMITTED -> OPEN (Working at venue)"}
+{"time": "2026-10-19 18:36:57,359", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-002 state changed: CREATED -> RISK_RESERVED (Risk capital reserved)"}
+{"time": "2026-10-19 18:36:57,364", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-002 state changed: RISK_RESERVED -> SUBMITTED (Submitted to simulator)"}
+{"time": "2026-10-19 18:36:57,367", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-002 state changed: SUBMITTED -> OPEN (Working at venue)"}
+{"time": "2026-10-19 18:36:57,372", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-003 state changed: CREATED -> RISK_RESERVED (Risk capital reserved)"}
+{"time": "2026-10-19 18:36:57,375", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-003 state changed: RISK_RESERVED -> SUBMITTED (Submitted to simulator)"}
+{"time": "2026-10-19 18:36:57,377", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-003 state changed: SUBMITTED -> OPEN (Working at venue)"}
+{"time": "2026-10-19 18:36:57,381", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-004 state changed: CREATED -> RISK_RESERVED (Risk capital reserved)"}
+{"time": "2026-10-19 18:36:57,384", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-004 state changed: RISK_RESERVED -> SUBMITTED (Submitted to simulator)"}
+{"time": "2026-10-19 18:36:57,386", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-004 state changed: SUBMITTED -> OPEN (Working at venue)"}
+{"time": "2026-10-19 18:36:57,391", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-005 state changed: CREATED -> RISK_RESERVED (Risk capital reserved)"}
+{"time": "2026-10-19 18:36:57,394", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-005 state changed: RISK_RESERVED -> SUBMITTED (Submitted to simulator)"}
+{"time": "2026-10-19 18:36:57,397", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-005 state changed: SUBMITTED -> OPEN (Working at venue)"}
+{"time": "2026-10-19 18:36:57,403", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-006 state changed: CREATED -> RISK_RESERVED (Risk capital reserved)"}
+{"time": "2026-10-19 18:36:57,406", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-006 state changed: RISK_RESERVED -> SUBMITTED (Submitted to simulator)"}
+{"time": "2026-10-19 18:36:57,409", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-006 state changed: SUBMITTED -> OPEN (Working at venue)"}
+{"time": "2026-10-19 18:36:57,415", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-007 state changed: CREATED -> RISK_RESERVED (Risk capital reserved)"}
+{"time": "2026-10-19 18:36:57,418", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-007 state changed: RISK_RESERVED -> SUBMITTED (Submitted to simulator)"}
+{"time": "2026-10-19 18:36:57,420", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-007 state changed: SUBMITTED -> OPEN (Working at venue)"}
+{"time": "2026-10-19 18:36:57,425", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-008 state changed: CREATED -> RISK_RESERVED (Risk capital reserved)"}
+{"time": "2026-10-19 18:36:57,428", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-008 state changed: RISK_RESERVED -> SUBMITTED (Submitted to simulator)"}
+{"time": "2026-10-19 18:36:57,431", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-008 state changed: SUBMITTED -> OPEN (Working at venue)"}
+{"time": "2026-10-19 18:36:57,436", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-009 state changed: CREATED -> RISK_RESERVED (Risk capital reserved)"}
+{"time": "2026-10-19 18:36:57,439", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-009 state changed: RISK_RESERVED -> SUBMITTED (Submitted to simulator)"}
+{"time": "2026-10-19 18:36:57,442", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-009 state changed: SUBMITTED -> OPEN (Working at venue)"}
+{"time": "2026-10-19 18:36:57,448", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-010 state changed: CREATED -> RISK_RESERVED (Risk capital reserved)"}
+{"time": "2026-10-19 18:36:57,451", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-010 state changed: RISK_RESERVED -> SUBMITTED (Submitted to simulator)"}
+{"time": "2026-10-19 18:36:57,454", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-010 state changed: SUBMITTED -> OPEN (Working at venue)"}
+{"time": "2026-10-19 18:36:57,458", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-011 state changed: CREATED -> RISK_RESERVED (Risk capital reserved)"}
+{"time": "2026-10-19 18:36:57,463", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-011 state changed: RISK_RESERVED -> SUBMITTED (Submitted to simulator)"}
+{"time": "2026-10-19 18:36:57,466", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-011 state changed: SUBMITTED -> OPEN (Working at venue)"}
+{"time": "2026-10-19 18:36:57,472", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-012 state changed: CREATED -> RISK_RESERVED (Risk capital reserved)"}
+{"time": "2026-10-19 18:36:57,475", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-012 state changed: RISK_RESERVED -> SUBMITTED (Submitted to simulator)"}
+{"time": "2026-10-19 18:36:57,477", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-012 state changed: SUBMITTED -> OPEN (Working at venue)"}
+{"time": "2026-10-19 18:36:57,482", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-013 state changed: CREATED -> RISK_RESERVED (Risk capital reserved)"}
+{"time": "2026-10-19 18:36:57,485", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-013 state changed: RISK_RESERVED -> SUBMITTED (Submitted to simulator)"}
+{"time": "2026-10-19 18:36:57,490", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-013 state changed: SUBMITTED -> OPEN (Working at venue)"}
+{"time": "2026-10-19 18:36:57,496", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-014 state changed: CREATED -> RISK_RESERVED (Risk capital reserved)"}
+{"time": "2026-10-19 18:36:57,499", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-014 state changed: RISK_RESERVED -> SUBMITTED (Submitted to simulator)"}
+{"time": "2026-10-19 18:36:57,503", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-014 state changed: SUBMITTED -> OPEN (Working at venue)"}
+{"time": "2026-10-19 18:36:57,508", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-015 state changed: CREATED -> RISK_RESERVED (Risk capital reserved)"}
+{"time": "2026-10-19 18:36:57,510", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-015 state changed: RISK_RESERVED -> SUBMITTED (Submitted to simulator)"}
+{"time": "2026-10-19 18:36:57,513", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-015 state changed: SUBMITTED -> OPEN (Working at venue)"}
+{"time": "2026-10-19 18:36:57,517", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-016 state changed: CREATED -> RISK_RESERVED (Risk capital reserved)"}
+{"time": "2026-10-19 18:36:57,520", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-016 state changed: RISK_RESERVED -> SUBMITTED (Submitted to simulator)"}
+{"time": "2026-10-19 18:36:57,523", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-016 state changed: SUBMITTED -> OPEN (Working at venue)"}
+{"time": "2026-10-19 18:36:57,528", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-017 state changed: CREATED -> RISK_RESERVED (Risk capital reserved)"}
+{"time": "2026-10-19 18:36:57,531", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-017 state changed: RISK_RESERVED -> SUBMITTED (Submitted to simulator)"}
+{"time": "2026-10-19 18:36:57,534", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-017 state changed: SUBMITTED -> OPEN (Working at venue)"}
+{"time": "2026-10-19 18:36:57,539", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-018 state changed: CREATED -> RISK_RESERVED (Risk capital reserved)"}
+{"time": "2026-10-19 18:36:57,542", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-018 state changed: RISK_RESERVED -> SUBMITTED (Submitted to simulator)"}
+{"time": "2026-10-19 18:36:57,547", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-018 state changed: SUBMITTED -> OPEN (Working at venue)"}
+{"time": "2026-10-19 18:36:57,552", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-019 state changed: CREATED -> RISK_RESERVED (Risk capital reserved)"}
+{"time": "2026-10-19 18:36:57,554", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-019 state changed: RISK_RESERVED -> SUBMITTED (Submitted to simulator)"}
+{"time": "2026-10-19 18:36:57,558", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-019 state changed: SUBMITTED -> OPEN (Working at venue)"}
+{"time": "2026-10-19 18:36:57,560", "level": "WARNING", "name": "src.brokergateway.gateway", "message": "LATE FILL RECEIVED for order ORD-RACE-000 in state CANCEL_REQUESTED: fill_id FILL-RACE-ORD-RACE-000, qty 10"}
+{"time": "2026-10-19 18:36:57,561", "level": "WARNING", "name": "src.brokergateway.gateway", "message": "LATE FILL RECEIVED for order ORD-RACE-001 in state CANCEL_REQUESTED: fill_id FILL-RACE-ORD-RACE-001, qty 10"}
+{"time": "2026-10-19 18:36:57,562", "level": "WARNING", "name": "src.brokergateway.gateway", "message": "LATE FILL RECEIVED for order ORD-RACE-002 in state CANCEL_REQUESTED: fill_id FILL-RACE-ORD-RACE-002, qty 10"}
+{"time": "2026-10-19 18:36:57,562", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-000 state changed: OPEN -> CANCEL_REQUESTED (Client requested cancellation)"}
+{"time": "2026-10-19 18:36:57,563", "level": "WARNING", "name": "src.brokergateway.gateway", "message": "LATE FILL RECEIVED for order ORD-RACE-003 in state CANCEL_REQUESTED: fill_id FILL-RACE-ORD-RACE-003, qty 10"}
+{"time": "2026-10-19 18:36:57,565", "level": "WARNING", "name": "src.brokergateway.gateway", "message": "LATE FILL RECEIVED for order ORD-RACE-004 in state CANCEL_REQUESTED: fill_id FILL-RACE-ORD-RACE-004, qty 10"}
+{"time": "2026-10-19 18:36:57,565", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-001 state changed: OPEN -> CANCEL_REQUESTED (Client requested cancellation)"}
+{"time": "2026-10-19 18:36:57,566", "level": "WARNING", "name": "src.brokergateway.gateway", "message": "LATE FILL RECEIVED for order ORD-RACE-005 in state CANCEL_REQUESTED: fill_id FILL-RACE-ORD-RACE-005, qty 10"}
+{"time": "2026-10-19 18:36:57,568", "level": "WARNING", "name": "src.brokergateway.gateway", "message": "LATE FILL RECEIVED for order ORD-RACE-006 in state CANCEL_REQUESTED: fill_id FILL-RACE-ORD-RACE-006, qty 10"}
+{"time": "2026-10-19 18:36:57,570", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-004 state changed: CANCEL_REQUESTED -> FILLED (Filled completely by fill FILL-RACE-ORD-RACE-004)"}
+{"time": "2026-10-19 18:36:57,572", "level": "WARNING", "name": "src.brokergateway.gateway", "message": "LATE FILL RECEIVED for order ORD-RACE-007 in state CANCEL_REQUESTED: fill_id FILL-RACE-ORD-RACE-007, qty 10"}
+{"time": "2026-10-19 18:36:57,573", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-005 state changed: OPEN -> CANCEL_REQUESTED (Client requested cancellation)"}
+{"time": "2026-10-19 18:36:57,574", "level": "WARNING", "name": "src.brokergateway.gateway", "message": "LATE FILL RECEIVED for order ORD-RACE-008 in state CANCEL_REQUESTED: fill_id FILL-RACE-ORD-RACE-008, qty 10"}
+{"time": "2026-10-19 18:36:57,574", "level": "WARNING", "name": "src.brokergateway.gateway", "message": "LATE FILL RECEIVED for order ORD-RACE-009 in state CANCEL_REQUESTED: fill_id FILL-RACE-ORD-RACE-009, qty 10"}
+{"time": "2026-10-19 18:36:57,574", "level": "WARNING", "name": "src.brokergateway.gateway", "message": "LATE FILL RECEIVED for order ORD-RACE-010 in state CANCEL_REQUESTED: fill_id FILL-RACE-ORD-RACE-010, qty 10"}
+{"time": "2026-10-19 18:36:57,583", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-003 state changed: CANCEL_REQUESTED -> FILLED (Filled completely by fill FILL-RACE-ORD-RACE-003)"}
+{"time": "2026-10-19 18:36:57,584", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-002 state changed: CANCEL_REQUESTED -> FILLED (Filled completely by fill FILL-RACE-ORD-RACE-002)"}
+{"time": "2026-10-19 18:36:57,578", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-003 state changed: OPEN -> CANCEL_REQUESTED (Client requested cancellation)"}
+{"time": "2026-10-19 18:36:57,578", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-006 state changed: OPEN -> CANCEL_REQUESTED (Client requested cancellation)"}
+{"time": "2026-10-19 18:36:57,578", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-002 state changed: OPEN -> CANCEL_REQUESTED (Client requested cancellation)"}
+{"time": "2026-10-19 18:36:57,579", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-001 state changed: CANCEL_REQUESTED -> FILLED (Filled completely by fill FILL-RACE-ORD-RACE-001)"}
+{"time": "2026-10-19 18:36:57,575", "level": "WARNING", "name": "src.brokergateway.gateway", "message": "LATE FILL RECEIVED for order ORD-RACE-011 in state CANCEL_REQUESTED: fill_id FILL-RACE-ORD-RACE-011, qty 10"}
+{"time": "2026-10-19 18:36:57,586", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-004 state changed: OPEN -> CANCEL_REQUESTED (Client requested cancellation)"}
+{"time": "2026-10-19 18:36:57,586", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-000 state changed: CANCEL_REQUESTED -> FILLED (Filled completely by fill FILL-RACE-ORD-RACE-000)"}
+{"time": "2026-10-19 18:36:57,588", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-007 state changed: OPEN -> CANCEL_REQUESTED (Client requested cancellation)"}
+{"time": "2026-10-19 18:36:57,600", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-008 state changed: CANCEL_REQUESTED -> FILLED (Filled completely by fill FILL-RACE-ORD-RACE-008)"}
+{"time": "2026-10-19 18:36:57,600", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-009 state changed: OPEN -> CANCEL_REQUESTED (Client requested cancellation)"}
+{"time": "2026-10-19 18:36:57,601", "level": "WARNING", "name": "src.brokergateway.gateway", "message": "LATE FILL RECEIVED for order ORD-RACE-015 in state CANCEL_REQUESTED: fill_id FILL-RACE-ORD-RACE-015, qty 10"}
+{"time": "2026-10-19 18:36:57,593", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-008 state changed: OPEN -> CANCEL_REQUESTED (Client requested cancellation)"}
+{"time": "2026-10-19 18:36:57,593", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-010 state changed: CANCEL_REQUESTED -> FILLED (Filled completely by fill FILL-RACE-ORD-RACE-010)"}
+{"time": "2026-10-19 18:36:57,594", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-010 state changed: OPEN -> CANCEL_REQUESTED (Client requested cancellation)"}
+{"time": "2026-10-19 18:36:57,598", "level": "WARNING", "name": "src.brokergateway.gateway", "message": "LATE FILL RECEIVED for order ORD-RACE-014 in state CANCEL_REQUESTED: fill_id FILL-RACE-ORD-RACE-014, qty 10"}
+{"time": "2026-10-19 18:36:57,600", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-007 state changed: CANCEL_REQUESTED -> FILLED (Filled completely by fill FILL-RACE-ORD-RACE-007)"}
+{"time": "2026-10-19 18:36:57,593", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-006 state changed: CANCEL_REQUESTED -> FILLED (Filled completely by fill FILL-RACE-ORD-RACE-006)"}
+{"time": "2026-10-19 18:36:57,588", "level": "WARNING", "name": "src.brokergateway.gateway", "message": "LATE FILL RECEIVED for order ORD-RACE-012 in state CANCEL_REQUESTED: fill_id FILL-RACE-ORD-RACE-012, qty 10"}
+{"time": "2026-10-19 18:36:57,591", "level": "WARNING", "name": "src.brokergateway.gateway", "message": "LATE FILL RECEIVED for order ORD-RACE-013 in state CANCEL_REQUESTED: fill_id FILL-RACE-ORD-RACE-013, qty 10"}
+{"time": "2026-10-19 18:36:57,601", "level": "WARNING", "name": "src.brokergateway.gateway", "message": "LATE FILL RECEIVED for order ORD-RACE-016 in state CANCEL_REQUESTED: fill_id FILL-RACE-ORD-RACE-016, qty 10"}
+{"time": "2026-10-19 18:36:57,602", "level": "WARNING", "name": "src.brokergateway.gateway", "message": "LATE FILL RECEIVED for order ORD-RACE-017 in state CANCEL_REQUESTED: fill_id FILL-RACE-ORD-RACE-017, qty 10"}
+{"time": "2026-10-19 18:36:57,603", "level": "WARNING", "name": "src.brokergateway.gateway", "message": "LATE FILL RECEIVED for order ORD-RACE-018 in state CANCEL_REQUESTED: fill_id FILL-RACE-ORD-RACE-018, qty 10"}
+{"time": "2026-10-19 18:36:57,603", "level": "WARNING", "name": "src.brokergateway.gateway", "message": "LATE FILL RECEIVED for order ORD-RACE-019 in state CANCEL_REQUESTED: fill_id FILL-RACE-ORD-RACE-019, qty 10"}
+{"time": "2026-10-19 18:36:57,612", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-013 state changed: OPEN -> CANCEL_REQUESTED (Client requested cancellation)"}
+{"time": "2026-10-19 18:36:57,615", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-016 state changed: OPEN -> CANCEL_REQUESTED (Client requested cancellation)"}
+{"time": "2026-10-19 18:36:57,620", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-015 state changed: CANCEL_REQUESTED -> FILLED (Filled completely by fill FILL-RACE-ORD-RACE-015)"}
+{"time": "2026-10-19 18:36:57,620", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-018 state changed: OPEN -> CANCEL_REQUESTED (Client requested cancellation)"}
+{"time": "2026-10-19 18:36:57,620", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-017 state changed: OPEN -> CANCEL_REQUESTED (Client requested cancellation)"}
+{"time": "2026-10-19 18:36:57,626", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-015 state changed: OPEN -> CANCEL_REQUESTED (Client requested cancellation)"}
+{"time": "2026-10-19 18:36:57,626", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-014 state changed: OPEN -> CANCEL_REQUESTED (Client requested cancellation)"}
+{"time": "2026-10-19 18:36:57,631", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-012 state changed: OPEN -> CANCEL_REQUESTED (Client requested cancellation)"}
+{"time": "2026-10-19 18:36:57,631", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-011 state changed: CANCEL_REQUESTED -> FILLED (Filled completely by fill FILL-RACE-ORD-RACE-011)"}
+{"time": "2026-10-19 18:36:57,636", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-019 state changed: OPEN -> CANCEL_REQUESTED (Client requested cancellation)"}
+{"time": "2026-10-19 18:36:57,640", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-017 state changed: CANCEL_REQUESTED -> FILLED (Filled completely by fill FILL-RACE-ORD-RACE-017)"}
+{"time": "2026-10-19 18:36:57,649", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-016 state changed: CANCEL_REQUESTED -> FILLED (Filled completely by fill FILL-RACE-ORD-RACE-016)"}
+{"time": "2026-10-19 18:36:57,660", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-012 state changed: CANCEL_REQUESTED -> FILLED (Filled completely by fill FILL-RACE-ORD-RACE-012)"}
+{"time": "2026-10-19 18:36:57,660", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-009 state changed: CANCEL_REQUESTED -> FILLED (Filled completely by fill FILL-RACE-ORD-RACE-009)"}
+{"time": "2026-10-19 18:36:57,662", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-019 state changed: CANCEL_REQUESTED -> FILLED (Filled completely by fill FILL-RACE-ORD-RACE-019)"}
+{"time": "2026-10-19 18:36:57,665", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-018 state changed: CANCEL_REQUESTED -> FILLED (Filled completely by fill FILL-RACE-ORD-RACE-018)"}
+{"time": "2026-10-19 18:36:57,670", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-013 state changed: CANCEL_REQUESTED -> FILLED (Filled completely by fill FILL-RACE-ORD-RACE-013)"}
+{"time": "2026-10-19 18:36:57,670", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-RACE-014 state changed: CANCEL_REQUESTED -> FILLED (Filled completely by fill FILL-RACE-ORD-RACE-014)"}
+{"time": "2026-10-19 18:36:57,712", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-UNC-001 state changed: CREATED -> RISK_RESERVED (Risk capital reserved)"}
+{"time": "2026-10-19 18:36:57,717", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-UNC-001 state changed: RISK_RESERVED -> SUBMISSION_UNKNOWN (Network timeout during submission: HTTP 504 Gateway Timeout)"}
+{"time": "2026-10-19 18:36:57,722", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-UNC-001 state changed: SUBMISSION_UNKNOWN -> OPEN (Confirmed active at venue via reconciliation)"}
+{"time": "2026-10-19 18:36:57,732", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-UNC-002 state changed: CREATED -> RISK_RESERVED (Risk capital reserved)"}
+{"time": "2026-10-19 18:36:57,736", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-UNC-002 state changed: RISK_RESERVED -> SUBMISSION_UNKNOWN (Network timeout during submission: Socket reset)"}
+{"time": "2026-10-19 18:36:57,741", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-UNC-002 state changed: SUBMISSION_UNKNOWN -> REJECTED (Confirmed absent at venue; order rejected)"}
+{"time": "2026-10-19 18:36:57,751", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-UNC-003 state changed: CREATED -> RISK_RESERVED (Risk capital reserved)"}
+{"time": "2026-10-19 18:36:57,755", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-UNC-003 state changed: RISK_RESERVED -> SUBMITTED (Dispatched)"}
+{"time": "2026-10-19 18:36:57,760", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-UNC-003 state changed: SUBMITTED -> OPEN (Open at venue)"}
+{"time": "2026-10-19 18:36:57,765", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-UNC-003 state changed: OPEN -> CANCEL_REQUESTED (Cancel sent)"}
+{"time": "2026-10-19 18:36:57,771", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-UNC-003 state changed: CANCEL_REQUESTED -> CANCEL_UNKNOWN (Network timeout during cancellation: Cancel ack dropped)"}
+{"time": "2026-10-19 18:36:57,775", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-UNC-003 state changed: CANCEL_UNKNOWN -> CANCELLED (Confirmed cancelled at venue via reconciliation)"}
+{"time": "2026-10-19 18:36:57,788", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-UNC-004 state changed: CREATED -> RISK_RESERVED (Risk capital reserved)"}
+{"time": "2026-10-19 18:36:57,795", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-UNC-004 state changed: RISK_RESERVED -> SUBMITTED (Dispatched)"}
+{"time": "2026-10-19 18:36:57,799", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-UNC-004 state changed: SUBMITTED -> OPEN (Open at venue)"}
+{"time": "2026-10-19 18:36:57,804", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-UNC-004 state changed: OPEN -> CANCEL_REQUESTED (Cancel sent)"}
+{"time": "2026-10-19 18:36:57,809", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-UNC-004 state changed: CANCEL_REQUESTED -> CANCEL_UNKNOWN (Network timeout during cancellation: Cancel ack dropped)"}
+{"time": "2026-10-19 18:36:57,817", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-UNC-004 state changed: CANCEL_UNKNOWN -> OPEN (Cancellation absent at venue; order remains OPEN)"}
+{"time": "2026-10-19 18:36:57,848", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-CRASH-001 state changed: CREATED -> RISK_RESERVED (Risk capital reserved)"}
+{"time": "2026-10-19 18:36:57,852", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-CRASH-001 state changed: RISK_RESERVED -> SUBMITTED (Dispatched)"}
+{"time": "2026-10-19 18:36:57,857", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-CRASH-001 state changed: SUBMITTED -> FILLED (Filled completely by fill FILL-CRASH-001)"}
+{"time": "2026-10-19 18:36:57,870", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-CRASH-002 state changed: CREATED -> RISK_RESERVED (Risk capital reserved)"}
+{"time": "2026-10-19 18:36:57,874", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-CRASH-002 state changed: RISK_RESERVED -> SUBMITTED (Dispatched)"}
+{"time": "2026-10-19 18:36:57,879", "level": "INFO", "name": "src.brokergateway.gateway", "message": "Order ORD-CRASH-002 state changed: SUBMITTED -> FILLED (Filled completely by fill FILL-CRASH-002)"}
+{"time": "2026-10-19 18:36:57,886", "level": "INFO", "name": "src.eodreconciler.reconciler", "message": "Session CRASH-RECOVERY-SESS-01 EOD Reconciliation BALANCED. Net PnL: 480.00"}
+======================================================================
+ALGO LAB UNIFIED: PHASE K OPTION B SIMULATION HARNESS
+Container: Docker --network none | Target: Concurrency, Races & Recovery
+======================================================================
+
+--- [Scenario 1] Multi-Threaded Capital Reservation Contention ---
+  Attempted: 10 threads (Total Demand: INR 200000.00)
+  Available Pool: INR 100000.00
+  Accepted Reservations: 5 (INR 100000.0)
+  Rejected (Insufficient Funds): 5
+[✓ PASS] Scenario 1: Capital Contention: PERFECT: Exactly 5 accepted, 5 rejected. Total active reserved == INR 100000.0
+
+--- [Scenario 2] Concurrent Fill vs Cancellation Race ---
+  Orders Raced: 20
+  Resolved to FILLED: 20
+  Resolved to CANCELLED: 0
+  Orders Trapped in Non-Terminal State: 0
+[✓ PASS] Scenario 2: Fill vs Cancel Race: PERFECT: All 20 orders resolved cleanly to terminal states (20 FILLED, 0 CANCELLED).
+
+--- [Scenario 3] Submission & Cancellation Uncertainty Resolution ---
+  [✓] SUBMISSION_UNKNOWN -> CONFIRMED_AT_VENUE -> OPEN verified.
+  [✓] SUBMISSION_UNKNOWN -> ABSENT_AT_VENUE    -> REJECTED verified.
+  [✓] CANCEL_UNKNOWN     -> CONFIRMED_AT_VENUE -> CANCELLED verified.
+  [✓] CANCEL_UNKNOWN     -> ABSENT_AT_VENUE    -> OPEN verified.
+[✓ PASS] Scenario 3: Timeout Uncertainties: PERFECT: All timeout and uncertainty transitions resolved deterministically.
+
+--- [Scenario 4] SQLite Hot-State Hydration & Crash Recovery ---
+  [!] Simulated Process Crash: In-memory gateway instance discarded.
+  Recovered Orders: 2/2
+  Recovered Fills:  2/2
+  Double-Entry Conservation: True
+  Discrepancies: []
+[✓ PASS] Scenario 4: Crash & Recovery: PERFECT: Full order & fill state recovered from SQLite. Balance sheet perfectly balanced.
+
+======================================================================
+OPTION B SIMULATION RESULTS SUMMARY
+======================================================================
+  [PASS] Scenario 1: Capital Contention
+         PERFECT: Exactly 5 accepted, 5 rejected. Total active reserved == INR 100000.0
+  [PASS] Scenario 2: Fill vs Cancel Race
+         PERFECT: All 20 orders resolved cleanly to terminal states (20 FILLED, 0 CANCELLED).
+  [PASS] Scenario 3: Timeout Uncertainties
+         PERFECT: All timeout and uncertainty transitions resolved deterministically.
+  [PASS] Scenario 4: Crash & Recovery
+         PERFECT: Full order & fill state recovered from SQLite. Balance sheet perfectly balanced.
+======================================================================

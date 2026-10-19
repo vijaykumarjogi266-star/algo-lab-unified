@@ -160,7 +160,10 @@ class HistoricalReplayEngine:
                         self.gateway.process_fill(exit_fill)
 
                         # Update cash and metrics
-                        self.cash += (Decimal(str(qty)) * exit_price) - exit_friction.total_transaction_cost - exit_friction.slippage
+                        if pos["side"] == OrderSide.BUY:
+                            self.cash += (Decimal(str(qty)) * exit_price) - exit_friction.total_transaction_cost - exit_friction.slippage
+                        else:
+                            self.cash -= (Decimal(str(qty)) * exit_price) + exit_friction.total_transaction_cost + exit_friction.slippage
                         gross_realized_pnl += trade_gross
                         total_fees += exit_friction.total_transaction_cost
                         total_slippage += exit_friction.slippage
@@ -246,7 +249,10 @@ class HistoricalReplayEngine:
                                 )
                                 self.gateway.process_fill(fill)
 
-                                self.cash -= (notional + entry_friction.total_transaction_cost + entry_friction.slippage)
+                                if signal.side == OrderSide.BUY:
+                                    self.cash -= (notional + entry_friction.total_transaction_cost + entry_friction.slippage)
+                                else:
+                                    self.cash += (notional - entry_friction.total_transaction_cost - entry_friction.slippage)
                                 total_fees += entry_friction.total_transaction_cost
                                 total_slippage += entry_friction.slippage
 
@@ -307,7 +313,10 @@ class HistoricalReplayEngine:
             self.gateway.process_fill(exit_fill)
             self.reservation_service.consume_capital(pos["reservation_id"])
 
-            self.cash += (Decimal(str(qty)) * exit_price) - exit_friction.total_transaction_cost - exit_friction.slippage
+            if pos["side"] == OrderSide.BUY:
+                self.cash += (Decimal(str(qty)) * exit_price) - exit_friction.total_transaction_cost - exit_friction.slippage
+            else:
+                self.cash -= (Decimal(str(qty)) * exit_price) + exit_friction.total_transaction_cost + exit_friction.slippage
             gross_realized_pnl += trade_gross
             total_fees += exit_friction.total_transaction_cost
             total_slippage += exit_friction.slippage
