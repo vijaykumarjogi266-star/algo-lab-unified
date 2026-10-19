@@ -1,21 +1,18 @@
-MIT License
+Algo Lab Internal Proprietary Evaluation License
 
 Copyright (c) 2026 Algo Lab Core Team
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+All rights reserved.
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+1. Internal Evaluation & Paper-Trading Rights:
+Permission is hereby granted to authorized internal members of the Algo Lab organization to access, build, inspect, and execute this software solely for internal evaluation, simulation, quantitative research, and paper-trading development within authorized organizational infrastructure.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+2. Redistribution & Public Publishing Prohibition:
+REDISTRIBUTION STATUS: BLOCKED.
+No person or entity is authorized to distribute, sublicense, sell, publish, mirror, host publicly, or transfer copies of this software, or any portion thereof, to any external party, repository, or public forge without prior explicit written authorization and copyright assignment from the Algo Lab Core Team and copyright holders.
+
+3. Permanent Paper-Only Restriction:
+This software is strictly restricted to simulated and paper trading. In accordance with core system invariants, execution using real capital or connecting to live broker order-placement gateways is strictly prohibited.
+
+4. Disclaimer of Warranty:
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.

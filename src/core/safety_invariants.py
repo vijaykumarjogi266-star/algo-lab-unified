@@ -30,8 +30,8 @@ ALLOW_REAL_BROKER_EXECUTION: bool = False
 REAL_MONEY_RISK_PAISE: int = 0
 PAPER_BROKER_ONLY: bool = True
 
-# Workspace root boundary anchor
-WORKSPACE_ROOT: Path = Path("/opt/ai-builder/workspaces/algolab-unification-20261019-083200/algo-lab-unified").resolve()
+# Workspace root boundary anchor (self-anchoring to repository root)
+WORKSPACE_ROOT: Path = Path(__file__).resolve().parents[2]
 
 # AST Prohibited broker SDKs and unsafe networking modules
 PROHIBITED_IMPORT_NAMES: FrozenSet[str] = frozenset({
@@ -57,6 +57,16 @@ def assert_paper_only_invariants(overrides: Optional[Mapping[str, Any]] = None) 
 
     Raises SecurityInvariantViolation immediately if any invariant is breached.
     """
+    # 1. Assert module-level constants are strictly unmutated
+    if ALLOW_LIVE_TRADING is not False or ALLOW_REAL_BROKER_EXECUTION is not False:
+        raise SecurityInvariantViolation(
+            "CRITICAL SAFETY VIOLATION: Module-level safety constants have been mutated."
+        )
+    if REAL_MONEY_RISK_PAISE != 0 or PAPER_BROKER_ONLY is not True:
+        raise SecurityInvariantViolation(
+            "CRITICAL SAFETY VIOLATION: Module-level safety constants have been mutated."
+        )
+
     env = os.environ if overrides is None else overrides
 
     # Check ALLOW_LIVE_TRADING

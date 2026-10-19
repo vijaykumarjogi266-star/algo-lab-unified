@@ -1,10 +1,10 @@
-# Release Manifest: Algo Lab Unified (v1.0.0)
+# Release Manifest: Algo Lab Unified (v1.0.1)
 
-**Release Identifier:** `algo-lab-unified-v1.0.0-paper-only`  
-**Build Date:** 2026-10-19 09:52:00 IST  
+**Release Identifier:** `algo-lab-unified-v1.0.1-paper-only`  
+**Build Date:** 2026-10-19 10:42:00 IST  
 **Task Identifier:** `algolab-unification-20261019-083200`  
-**License:** MIT (Copyright (c) 2026 Algo Lab Core Team)  
-**Checksums File:** [`CHECKSUMS.sha256`](file:///opt/ai-builder/workspaces/algolab-unification-20261019-083200/algo-lab-unified/CHECKSUMS.sha256)
+**License:** Algo Lab Internal Proprietary Evaluation License (`REDISTRIBUTION STATUS: BLOCKED`)  
+**Checksums File:** [`CHECKSUMS.sha256`](file:///opt/ai-builder/workspaces/algolab-unification-20261019-083200/algo-lab-unified-remediation/CHECKSUMS.sha256)
 
 ---
 
@@ -20,7 +20,7 @@
 | `src/strategies/` | 3 modules | Decoupled intraday momentum breakout strategy with conservative SL/TP collision |
 | `src/simulation/` | 3 modules | Event-driven historical replay engine & official NSE statutory fee schedule |
 | `scripts/` | 3 scripts | Preflight safety auditor, safe rollback script, backtest runner |
-| `tests/unit/` | 4 suites | 28 automated unit tests (100% green pass rate in 0.07s) |
+| `tests/unit/` | 5 suites | 36 automated unit tests (100% green pass rate) |
 
 ---
 
@@ -35,6 +35,11 @@ PAPER_BROKER_ONLY = True
 
 ---
 
-## 3. Cryptographic Checksum Sample
+## 3. Cryptographic Checksum Architecture
 
-Please inspect [`CHECKSUMS.sha256`](file:///opt/ai-builder/workspaces/algolab-unification-20261019-083200/algo-lab-unified/CHECKSUMS.sha256) for the full 39-file cryptographic verification table.
+The cryptographic hash table [`CHECKSUMS.sha256`](file:///opt/ai-builder/workspaces/algolab-unification-20261019-083200/algo-lab-unified-remediation/CHECKSUMS.sha256) is generated deterministically from all Git-tracked release files.
+
+- **Total Tracked Files in Repository:** 42 files.
+- **Total Hashes in Checksums File:** 41 entries.
+- **Sole Excluded File:** `CHECKSUMS.sha256` is mathematically excluded from its own digest list to prevent circular hashing.
+- **Zero Runtime Debris:** All untracked logs (`*.log`), caches (`.pytest_cache/`, `__pycache__/`), and local databases are strictly excluded.
