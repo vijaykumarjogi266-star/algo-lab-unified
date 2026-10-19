@@ -28,9 +28,9 @@ logger = get_logger(__name__)
 LEGAL_TRANSITIONS: Dict[OrderState, Set[OrderState]] = {
     OrderState.CREATED: {OrderState.RISK_RESERVED, OrderState.REJECTED},
     OrderState.RISK_RESERVED: {OrderState.SUBMITTED, OrderState.SUBMISSION_UNKNOWN, OrderState.REJECTED},
-    OrderState.SUBMITTED: {OrderState.OPEN, OrderState.PARTIALLY_FILLED, OrderState.FILLED, OrderState.SUBMISSION_UNKNOWN, OrderState.REJECTED},
+    OrderState.SUBMITTED: {OrderState.OPEN, OrderState.PARTIALLY_FILLED, OrderState.FILLED, OrderState.SUBMISSION_UNKNOWN, OrderState.REJECTED, OrderState.CANCELLED},
     OrderState.SUBMISSION_UNKNOWN: {OrderState.OPEN, OrderState.PARTIALLY_FILLED, OrderState.FILLED, OrderState.REJECTED, OrderState.CANCELLED},
-    OrderState.OPEN: {OrderState.PARTIALLY_FILLED, OrderState.FILLED, OrderState.CANCEL_REQUESTED, OrderState.EXPIRED},
+    OrderState.OPEN: {OrderState.PARTIALLY_FILLED, OrderState.FILLED, OrderState.CANCEL_REQUESTED, OrderState.CANCELLED, OrderState.EXPIRED},
     OrderState.PARTIALLY_FILLED: {OrderState.PARTIALLY_FILLED, OrderState.FILLED, OrderState.CANCEL_REQUESTED},
     OrderState.CANCEL_REQUESTED: {OrderState.CANCELLED, OrderState.CANCEL_UNKNOWN, OrderState.PARTIALLY_FILLED, OrderState.FILLED},
     OrderState.CANCEL_UNKNOWN: {OrderState.OPEN, OrderState.PARTIALLY_FILLED, OrderState.FILLED, OrderState.CANCELLED},

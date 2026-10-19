@@ -1,0 +1,380 @@
+{
+  "inventory_metadata": {
+    "generated_at": "2026-10-19T21:05:00+05:30",
+    "version": "1.0.0",
+    "authoritative_workspace": "/opt/ai-builder/workspaces/algolab-strategy-reuse-20261019-210500/algo-lab-unified/",
+    "source_repositories": {
+      "algopro": {
+        "path": "/home/ubuntu/algopro",
+        "commit": "e7a02fa6e933c19d6bfa4c6a4cf30ede703ab67f"
+      },
+      "all_in_one": {
+        "path": "/home/ubuntu/all-in-one",
+        "commit": "8a23393c36c091880ad38284ab8468072857482d"
+      },
+      "algolab": {
+        "path": "/home/ubuntu/algolab",
+        "commit": "2389387ea351c733909f39245adbeca0c935a12a"
+      },
+      "unified_base": {
+        "path": "/opt/ai-builder/workspaces/algolab-hardening-20261019-204100/algo-lab-unified",
+        "commit": "0e9d2aab4357646f8731358cc74e2ce1212a5eea"
+      }
+    }
+  },
+  "strategies": [
+    {
+      "strategy_id": "STRAT_SMA_CROSS",
+      "strategy_name": "SMA Crossover Benchmark",
+      "source_repo": "algopro",
+      "source_file": "quant/strategies/sma_cross.py",
+      "source_commit": "e7a02fa6e933c19d6bfa4c6a4cf30ede703ab67f",
+      "timeframe": "Intraday / Swing (5m to Daily)",
+      "market_session": "Standard NSE (09:15 - 15:30 IST)",
+      "directions": ["LONG"],
+      "entry_rules": "Fast SMA crosses strictly above Slow SMA (golden cross); no prior position open.",
+      "exit_rules": "Fast SMA crosses strictly below Slow SMA (death cross) or fixed 3% stop loss hit.",
+      "indicators": ["SMA(fast_period)", "SMA(slow_period)"],
+      "parameter_defaults": {
+        "fast_period": 9,
+        "slow_period": 21,
+        "stop_loss_pct": 0.03
+      },
+      "parameter_bounds": {
+        "fast_period": {"min": 2, "max": 100, "type": "int"},
+        "slow_period": {"min": 5, "max": 300, "type": "int"},
+        "stop_loss_pct": {"min": 0.005, "max": 0.20, "type": "float"}
+      },
+      "interface": "BaseStrategy.on_bar / evaluate_data",
+      "output_schema": "StrategyDecision / TradeCandidate",
+      "tests_available": "tests/unit/test_strategy_dispatch_provenance.py",
+      "known_defects": "Fixed 3% stop loss does not adapt to ATR volatility; uses numpy slice directly without handling incomplete warmup cleanly.",
+      "canonical_recommendation": "Adopt with strict parameter validation (fast < slow), fail-closed warmup checks, and ATR-based volatility stop.",
+      "action": "INTEGRATE_REPAIRED"
+    },
+    {
+      "strategy_id": "STRAT_VWAP_REVERSION",
+      "strategy_name": "VWAP Mean Reversion",
+      "source_repo": "algopro",
+      "source_file": "quant/strategies/vwap_reversion.py",
+      "source_commit": "e7a02fa6e933c19d6bfa4c6a4cf30ede703ab67f",
+      "timeframe": "Intraday 5m",
+      "market_session": "Standard NSE (09:15 - 15:30 IST)",
+      "directions": ["LONG"],
+      "entry_rules": "Price closes at or below lower VWAP band (>= 2.0 std dev) and low penetrates lower band; target is reversion back to VWAP.",
+      "exit_rules": "Price reaches VWAP benchmark (target) or trailing ATR stop loss hit.",
+      "indicators": ["Session VWAP", "VWAP Standard Deviation Bands (2.0σ)", "ATR(14)"],
+      "parameter_defaults": {
+        "std_dev_threshold": 2.0,
+        "stop_loss_atr_mult": 1.5
+      },
+      "parameter_bounds": {
+        "std_dev_threshold": {"min": 0.5, "max": 4.0, "type": "float"},
+        "stop_loss_atr_mult": {"min": 0.5, "max": 5.0, "type": "float"}
+      },
+      "interface": "BaseStrategy.on_bar / evaluate_data",
+      "output_schema": "StrategyDecision / TradeCandidate",
+      "tests_available": "tests/unit/test_vwap_research.py",
+      "known_defects": "Hardcoded ATR fallback of 5.0 on line 46; missing timezone session boundary resets when switching trading days in streaming feed.",
+      "canonical_recommendation": "Integrate with session-boundary cumulative VWAP calculation, explicit zero-volume handling, and calculated ATR.",
+      "action": "INTEGRATE_REPAIRED"
+    },
+    {
+      "strategy_id": "STRAT_ORB",
+      "strategy_name": "Opening Range Breakout (ORB)",
+      "source_repo": "algopro",
+      "source_file": "quant/strategies/orb.py",
+      "source_commit": "e7a02fa6e933c19d6bfa4c6a4cf30ede703ab67f",
+      "timeframe": "Intraday 5m",
+      "market_session": "09:15 to 15:30 IST (Breakout window: 09:30 to 14:45 IST)",
+      "directions": ["LONG", "SHORT"],
+      "entry_rules": "Establish high and low of first range_bars (e.g. 3 bars of 5m = 15m range). Enter on close penetrating opening high (Long) or opening low (Short) with RVOL >= 1.2x prior to cutoff (14:45 IST).",
+      "exit_rules": "Target = Entry + (Range * R:R) or Stop Loss = midpoint / opposite side of range.",
+      "indicators": ["Opening Range High/Low", "RVOL(20)", "ATR(14)"],
+      "parameter_defaults": {
+        "range_bars": 3,
+        "volume_multiplier": 1.2,
+        "risk_reward_ratio": 2.0,
+        "cutoff_time_ist": "14:45"
+      },
+      "parameter_bounds": {
+        "range_bars": {"min": 1, "max": 12, "type": "int"},
+        "volume_multiplier": {"min": 1.0, "max": 5.0, "type": "float"},
+        "risk_reward_ratio": {"min": 1.0, "max": 5.0, "type": "float"}
+      },
+      "interface": "BaseStrategy.on_bar / evaluate_data",
+      "output_schema": "StrategyDecision / TradeCandidate",
+      "tests_available": "tests/unit/test_strategy_dispatch_provenance.py",
+      "known_defects": "Cutoff check was commented out; trade_taken_today consumed immediately on candidate creation; opening range calculated from bar counter rather than validated session time.",
+      "canonical_recommendation": "Repair timing cutoff using Asia/Kolkata timezone, decouple candidate generation from fill consumption, enforce session bar eligibility.",
+      "action": "INTEGRATE_REPAIRED"
+    },
+    {
+      "strategy_id": "STRAT_DONCHIAN_BREAKOUT",
+      "strategy_name": "Donchian 20-Bar Channel Breakout",
+      "source_repo": "algopro",
+      "source_file": "quant/strategies/donchian_breakout.py",
+      "source_commit": "e7a02fa6e933c19d6bfa4c6a4cf30ede703ab67f",
+      "timeframe": "Intraday 5m / Daily Swing",
+      "market_session": "Standard NSE (09:15 - 15:30 IST)",
+      "directions": ["LONG"],
+      "entry_rules": "Close penetrates above the highest high of the preceding period bars (excluding current bar).",
+      "exit_rules": "Stop loss at entry - (stop_loss_atr * ATR) and target at entry + (target_atr * ATR) or 10-bar low trailing stop.",
+      "indicators": ["Donchian High(period)", "ATR(14)"],
+      "parameter_defaults": {
+        "period": 20,
+        "stop_loss_atr": 1.5,
+        "target_atr": 3.0
+      },
+      "parameter_bounds": {
+        "period": {"min": 5, "max": 100, "type": "int"},
+        "stop_loss_atr": {"min": 0.5, "max": 5.0, "type": "float"},
+        "target_atr": {"min": 1.0, "max": 10.0, "type": "float"}
+      },
+      "interface": "BaseStrategy.evaluate_data",
+      "output_schema": "StrategyDecision",
+      "tests_available": "tests/unit/test_strategy_dispatch_provenance.py",
+      "known_defects": "Uses numpy slice with negative index that could wrap or miscalculate if bars count < period.",
+      "canonical_recommendation": "Integrate with strict lagged range calculation (excluding current bar) and separate Intraday vs Swing variant IDs.",
+      "action": "INTEGRATE_REPAIRED"
+    },
+    {
+      "strategy_id": "STRAT_BOLLINGER_REVERSION",
+      "strategy_name": "Bollinger Bands 2.0σ Mean Reversion",
+      "source_repo": "algopro",
+      "source_file": "quant/strategies/bollinger_reversion.py",
+      "source_commit": "e7a02fa6e933c19d6bfa4c6a4cf30ede703ab67f",
+      "timeframe": "Intraday 5m / Daily",
+      "market_session": "Standard NSE (09:15 - 15:30 IST)",
+      "directions": ["LONG"],
+      "entry_rules": "Price stretches below Lower Bollinger Band (SMA20 - 2.0σ). Enter Long on oversold exhaustion.",
+      "exit_rules": "Exit at middle band (SMA20 mean reversion) or stop loss at entry - (1.5 * ATR).",
+      "indicators": ["SMA(period)", "Bollinger Bands(period, num_std)", "ATR(14)"],
+      "parameter_defaults": {
+        "period": 20,
+        "num_std": 2.0,
+        "stop_loss_atr": 1.5,
+        "target_atr": 3.0
+      },
+      "parameter_bounds": {
+        "period": {"min": 5, "max": 100, "type": "int"},
+        "num_std": {"min": 1.0, "max": 4.0, "type": "float"},
+        "stop_loss_atr": {"min": 0.5, "max": 5.0, "type": "float"},
+        "target_atr": {"min": 1.0, "max": 10.0, "type": "float"}
+      },
+      "interface": "BaseStrategy.evaluate_data",
+      "output_schema": "StrategyDecision",
+      "tests_available": "tests/unit/test_strategy_dispatch_provenance.py",
+      "known_defects": "Parameter overrides in evaluate_data were partially applied; rolling window included current bar causing retrospective shrinkage of standard deviation.",
+      "canonical_recommendation": "Enforce strict parameter overrides and lag the band calculation to prior closed bars.",
+      "action": "INTEGRATE_REPAIRED"
+    },
+    {
+      "strategy_id": "STRAT_TTM_SQUEEZE",
+      "strategy_name": "TTM Volatility Squeeze Breakout",
+      "source_repo": "algopro",
+      "source_file": "quant/strategies/volatility_squeeze.py",
+      "source_commit": "e7a02fa6e933c19d6bfa4c6a4cf30ede703ab67f",
+      "timeframe": "Intraday 5m / Daily Swing",
+      "market_session": "Standard NSE (09:15 - 15:30 IST)",
+      "directions": ["LONG", "SHORT"],
+      "entry_rules": "Detect Bollinger Bands (20, 2.0σ) contracting entirely inside Keltner Channels (20, 1.5 ATR). When squeeze fires (bands expand outside channels) accompanied by volume surge (>= 1.15x 20-bar avg), enter in direction of price momentum relative to SMA20.",
+      "exit_rules": "Stop loss at 1.5x ATR, target at 3.0x ATR.",
+      "indicators": ["Bollinger Bands(20, 2.0)", "Keltner Channels(20, 1.5)", "SMA(20)", "Volume SMA(20)", "ATR(14)"],
+      "parameter_defaults": {
+        "bb_period": 20,
+        "bb_std": 2.0,
+        "kc_atr_mult": 1.5,
+        "volume_multiplier": 1.15,
+        "stop_loss_atr": 1.5,
+        "target_atr": 3.0
+      },
+      "parameter_bounds": {
+        "bb_period": {"min": 5, "max": 100, "type": "int"},
+        "bb_std": {"min": 1.0, "max": 4.0, "type": "float"},
+        "kc_atr_mult": {"min": 0.5, "max": 3.0, "type": "float"},
+        "volume_multiplier": {"min": 1.0, "max": 3.0, "type": "float"},
+        "stop_loss_atr": {"min": 0.5, "max": 5.0, "type": "float"},
+        "target_atr": {"min": 1.0, "max": 10.0, "type": "float"}
+      },
+      "interface": "BaseStrategy.evaluate_data",
+      "output_schema": "StrategyDecision",
+      "tests_available": "tests/unit/test_strategy_dispatch_provenance.py",
+      "known_defects": "Supplied parameters in evaluate_data were completely ignored due to direct references to self.bb_std, self.kc_atr_mult, and self.volume_multiplier.",
+      "canonical_recommendation": "Fix parameter override extraction so runtime parameters directly modify calculations, and enforce strict point-in-time calculation.",
+      "action": "INTEGRATE_REPAIRED"
+    },
+    {
+      "strategy_id": "STRAT_EMA_PULLBACK",
+      "strategy_name": "EMA 9/21 Pullback Swing",
+      "source_repo": "algolab",
+      "source_file": "scripts/run_swing_trading_strategies_backtest.py",
+      "source_commit": "2389387ea351c733909f39245adbeca0c935a12a",
+      "timeframe": "Intraday / Swing (Daily / 5m)",
+      "market_session": "Standard NSE (09:15 - 15:30 IST)",
+      "directions": ["LONG"],
+      "entry_rules": "Primary uptrend filter (Close > 200 SMA, 20 SMA > 50 SMA). Pullback occurs where bar low dips into 9-21 EMA zone and close bounces above 9 EMA with Close > Open.",
+      "exit_rules": "Chandelier ATR Trailing Stop (2.5x ATR below highest high) or trend violation exit (EMA 9 crosses below EMA 21 after 3 days).",
+      "indicators": ["EMA(9)", "EMA(21)", "SMA(20)", "SMA(50)", "SMA(200)", "ATR(14)"],
+      "parameter_defaults": {
+        "ema_fast": 9,
+        "ema_slow": 21,
+        "sma_trend": 200,
+        "stop_loss_atr": 2.0,
+        "target_reward_ratio": 3.0
+      },
+      "parameter_bounds": {
+        "ema_fast": {"min": 3, "max": 50, "type": "int"},
+        "ema_slow": {"min": 10, "max": 100, "type": "int"},
+        "stop_loss_atr": {"min": 0.5, "max": 5.0, "type": "float"},
+        "target_reward_ratio": {"min": 1.0, "max": 6.0, "type": "float"}
+      },
+      "interface": "Custom script logic in backtester",
+      "output_schema": "TradeCandidate / StrategySignal",
+      "tests_available": "Backtest script execution logs (2021-2026 reproduction)",
+      "known_defects": "Only existed as monolithic script code without a standalone modular strategy class.",
+      "canonical_recommendation": "Modularize into a standalone canonical strategy class inheriting from BaseStrategy.",
+      "action": "INTEGRATE_NEW_MODULE"
+    },
+    {
+      "strategy_id": "STRAT_MOMENTUM_BREAKOUT_V1",
+      "strategy_name": "Intraday Momentum Breakout V1",
+      "source_repo": "unified_base",
+      "source_file": "src/strategies/momentum_breakout.py",
+      "source_commit": "0e9d2aab4357646f8731358cc74e2ce1212a5eea",
+      "timeframe": "Intraday 5m",
+      "market_session": "Standard NSE (09:15 - 15:30 IST)",
+      "directions": ["LONG", "SHORT"],
+      "entry_rules": "Breakout beyond 20-period high/low with confirmed RVOL >= 1.5x and spread <= 10 bps.",
+      "exit_rules": "Stop Loss: 1.0 x ATR; Take Profit: 2.0 x ATR; EOD forced square-off at 15:15 IST.",
+      "indicators": ["High(20)", "Low(20)", "RVOL(20)", "ATR(14)"],
+      "parameter_defaults": {
+        "risk_reward_ratio": 2.0,
+        "atr_stop_multiplier": 1.0
+      },
+      "parameter_bounds": {
+        "risk_reward_ratio": {"min": 1.0, "max": 5.0, "type": "float"},
+        "atr_stop_multiplier": {"min": 0.5, "max": 3.0, "type": "float"}
+      },
+      "interface": "evaluate_candidate(ScanCandidate) -> StrategySignal",
+      "output_schema": "StrategySignal",
+      "tests_available": "tests/unit/test_scanner_strategy.py, test_tick_precision.py",
+      "known_defects": "Previously lacked date-aware tick quantization; hardened in commit 0e9d2aa.",
+      "canonical_recommendation": "Maintain as primary production-hardened benchmark breakout strategy.",
+      "action": "PRESERVE_AND_UNIFY"
+    },
+    {
+      "strategy_id": "STRAT_OMS_MEAN_REV",
+      "strategy_name": "OMS Blueprint Mean Reversion",
+      "source_repo": "all_in_one",
+      "source_file": "oms_project/strategy_factory.py",
+      "source_commit": "8a23393c36c091880ad38284ab8468072857482d",
+      "timeframe": "Intraday / Tick",
+      "market_session": "Standard NSE (09:15 - 15:30 IST)",
+      "directions": ["LONG", "SHORT"],
+      "entry_rules": "Price stretches beyond SMA window by threshold std devs.",
+      "exit_rules": "Reversion to SMA window or fixed stop_loss_pct.",
+      "indicators": ["SMA(window)", "StdDev(window)"],
+      "parameter_defaults": {
+        "window": 20,
+        "threshold": 1.5,
+        "stop_loss_pct": 0.02
+      },
+      "parameter_bounds": {
+        "window": {"min": 2, "max": 200, "type": "int"},
+        "threshold": {"min": 0.1, "max": 5.0, "type": "float"},
+        "stop_loss_pct": {"min": 0.005, "max": 0.20, "type": "float"}
+      },
+      "interface": "BaseStrategy.on_tick / on_bar",
+      "output_schema": "OrderIntent",
+      "tests_available": "oms_project/tests/test_strategy_factory.py",
+      "known_defects": "Directly emitted OrderIntent bypassing risk gateway; duplicate of BollingerReversion semantics.",
+      "canonical_recommendation": "Provide explicit adapter to canonical StrategySignal, route through BrokerGateway.",
+      "action": "ADAPT_AND_UNIFY"
+    },
+    {
+      "strategy_id": "STRAT_OMS_TREND_FOLLOWING",
+      "strategy_name": "OMS Blueprint Trend Following",
+      "source_repo": "all_in_one",
+      "source_file": "oms_project/strategy_factory.py",
+      "source_commit": "8a23393c36c091880ad38284ab8468072857482d",
+      "timeframe": "Intraday / Tick",
+      "market_session": "Standard NSE (09:15 - 15:30 IST)",
+      "directions": ["LONG"],
+      "entry_rules": "Short SMA crosses above Long SMA.",
+      "exit_rules": "Trailing stop loss or reverse cross.",
+      "indicators": ["SMA(short_window)", "SMA(long_window)"],
+      "parameter_defaults": {
+        "short_window": 5,
+        "long_window": 20,
+        "stop_loss_pct": 0.02
+      },
+      "parameter_bounds": {
+        "short_window": {"min": 2, "max": 50, "type": "int"},
+        "long_window": {"min": 10, "max": 200, "type": "int"},
+        "stop_loss_pct": {"min": 0.005, "max": 0.20, "type": "float"}
+      },
+      "interface": "BaseStrategy.on_tick / on_bar",
+      "output_schema": "OrderIntent",
+      "tests_available": "oms_project/tests/test_strategy_factory.py",
+      "known_defects": "Directly emitted OrderIntent; duplicate of SMACross semantics with different default windows.",
+      "canonical_recommendation": "Provide explicit adapter to canonical StrategySignal, route through BrokerGateway.",
+      "action": "ADAPT_AND_UNIFY"
+    },
+    {
+      "strategy_id": "STRAT_OMS_HYBRID_ALPHA",
+      "strategy_name": "OMS Blueprint Hybrid Alpha",
+      "source_repo": "all_in_one",
+      "source_file": "oms_project/strategy_factory.py",
+      "source_commit": "8a23393c36c091880ad38284ab8468072857482d",
+      "timeframe": "Intraday / Tick",
+      "market_session": "Standard NSE (09:15 - 15:30 IST)",
+      "directions": ["LONG", "SHORT"],
+      "entry_rules": "Regime switching: when volatility < threshold, runs Mean Reversion; when volatility >= threshold, runs Trend Following.",
+      "exit_rules": "Sub-strategy exit rules or stop_loss_pct.",
+      "indicators": ["Realized Volatility(volatility_window)", "SMA", "Bollinger Bands"],
+      "parameter_defaults": {
+        "volatility_window": 10,
+        "volatility_threshold": 0.01,
+        "window": 20,
+        "short_window": 5,
+        "long_window": 20,
+        "stop_loss_pct": 0.02
+      },
+      "parameter_bounds": {
+        "volatility_window": {"min": 5, "max": 50, "type": "int"},
+        "volatility_threshold": {"min": 0.001, "max": 0.05, "type": "float"},
+        "window": {"min": 2, "max": 100, "type": "int"},
+        "short_window": {"min": 2, "max": 50, "type": "int"},
+        "long_window": {"min": 10, "max": 100, "type": "int"}
+      },
+      "interface": "BaseStrategy.on_tick / on_bar",
+      "output_schema": "OrderIntent",
+      "tests_available": "oms_project/tests/test_strategy_factory.py",
+      "known_defects": "Hardcoded thresholds and direct OrderIntent dispatch without paper capital reservation check.",
+      "canonical_recommendation": "Integrate as regime-adaptive meta-strategy adapting signals into canonical StrategySignal.",
+      "action": "ADAPT_AND_UNIFY"
+    },
+    {
+      "strategy_id": "STRAT_BUY_AND_HOLD",
+      "strategy_name": "Buy and Hold Passive Benchmark",
+      "source_repo": "algopro",
+      "source_file": "quant/strategies/buy_and_hold.py",
+      "source_commit": "e7a02fa6e933c19d6bfa4c6a4cf30ede703ab67f",
+      "timeframe": "Daily / Multi-day",
+      "market_session": "Standard NSE",
+      "directions": ["LONG"],
+      "entry_rules": "Buys once at session inception.",
+      "exit_rules": "Holds indefinitely.",
+      "indicators": [],
+      "parameter_defaults": {},
+      "parameter_bounds": {},
+      "interface": "BaseStrategy.on_bar",
+      "output_schema": "TradeCandidate",
+      "tests_available": "tests/unit/test_strategy_dispatch_provenance.py",
+      "known_defects": "Not an intraday strategy; baseline reference only.",
+      "canonical_recommendation": "Preserve as benchmark comparison strategy in registry.",
+      "action": "PRESERVE_BENCHMARK"
+    }
+  ]
+}

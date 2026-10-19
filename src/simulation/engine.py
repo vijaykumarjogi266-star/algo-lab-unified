@@ -13,7 +13,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from decimal import Decimal
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, Union
 import uuid
 
 from src.brokergateway.gateway import BrokerGateway
@@ -27,7 +27,9 @@ from src.core.tick_precision import HistoricalSecurityTickMaster, quantize_order
 from src.scanner.scanner import IntradayMarketScanner, MarketBar
 from src.simulation.fee_model import NSEFrictionModel
 from src.simulation.fill_model import RealisticPaperFillModel
+from src.strategies.base import BaseStrategy
 from src.strategies.momentum_breakout import MomentumBreakoutStrategy
+from src.strategies.registry import StrategyRegistry
 
 
 @dataclass
@@ -64,6 +66,8 @@ class HistoricalReplayEngine:
         max_risk_per_trade_pct: Decimal = Decimal("0.02"),  # 2% risk ceiling
         fill_mode: str = "REALISTIC_PENETRATION",
         fill_model: Optional[RealisticPaperFillModel] = None,
+        strategy: Optional[Union[str, BaseStrategy]] = None,
+        strategy_params: Optional[Dict[str, Any]] = None,
     ):
         self.initial_capital = initial_capital
         self.cash = initial_capital
@@ -72,7 +76,15 @@ class HistoricalReplayEngine:
         self.fill_model = fill_model or RealisticPaperFillModel(mode=fill_mode)
 
         self.scanner = IntradayMarketScanner()
-        self.strategy = MomentumBreakoutStrategy()
+        if strategy is None:
+            self.strategy: BaseStrategy = MomentumBreakoutStrategy()
+        elif isinstance(strategy, str):
+            self.strategy = StrategyRegistry.create_strategy(strategy, strategy_params)
+        elif isinstance(strategy, BaseStrategy):
+            self.strategy = strategy
+        else:
+            raise TypeError(f"Invalid strategy type: {type(strategy)}")
+
         self.reservation_service = CapitalReservationService()
         self.gateway = BrokerGateway()
         self.reconciler = EODReconciler()
@@ -152,10 +164,11 @@ class HistoricalReplayEngine:
 
                         # Create dedicated exit order
                         exit_order_id = f"ORD-EXIT-{uuid.uuid4().hex[:8]}"
+                        current_strat_id = getattr(self.strategy, "strategy_id", getattr(self.strategy, "STRATEGY_ID", "STRAT_MOMENTUM_BREAKOUT_V1"))
                         exit_order = self.gateway.create_order(
                             order_id=exit_order_id,
                             idempotency_key=f"IDEM-{exit_order_id}",
-                            strategy_id=self.strategy.STRATEGY_ID,
+                            strategy_id=current_strat_id,
                             symbol=symbol,
                             side=exit_side,
                             order_type=OrderType.MARKET,
@@ -210,66 +223,77 @@ class HistoricalReplayEngine:
                         self.equity_curve.append(self.cash)
                         continue
 
-                # Scanner evaluation if no position open
-                if symbol not in open_positions and len(symbol_history[symbol]) >= 20:
-                    candidate = self.scanner.scan_symbol(symbol, bar, symbol_history[symbol])
-                    if candidate:
-                        signal = self.strategy.evaluate_candidate(candidate)
-                        if signal:
-                            # Position sizing: risk 2% of cash, but cap total notional at 20% of available cash
-                            risk_amount = self.cash * self.max_risk_per_trade_pct
-                            risk_per_share = abs(signal.target_entry_price - signal.stop_loss)
-                            raw_qty = int(risk_amount / risk_per_share) if risk_per_share > Decimal("0.0") else 0
-                            max_capital_qty = int((self.cash * Decimal("0.20")) / signal.target_entry_price)
-                            qty = max(1, min(raw_qty, max_capital_qty))
+                # Strategy evaluation if no position open
+                if symbol not in open_positions:
+                    strat_id = getattr(self.strategy, "strategy_id", getattr(self.strategy, "STRATEGY_ID", ""))
+                    signal = None
+                    if strat_id == "STRAT_MOMENTUM_BREAKOUT_V1" and hasattr(self.strategy, "evaluate_candidate"):
+                        if len(symbol_history[symbol]) >= 20:
+                            candidate = self.scanner.scan_symbol(symbol, bar, symbol_history[symbol])
+                            if candidate:
+                                signal = self.strategy.evaluate_candidate(candidate)
+                    else:
+                        signal = self.strategy.evaluate(bar, symbol_history[symbol])
 
-                            notional = Decimal(str(qty)) * signal.target_entry_price
-                            # Reserve capital atomically
-                            res = self.reservation_service.reserve_capital(
-                                reservation_id=f"RES-{uuid.uuid4().hex[:8]}",
-                                account_id="PAPER_ACC_01",
+                    if signal:
+                        # Position sizing: risk 2% of cash, but cap total notional at 20% of available cash
+                        risk_amount = self.cash * self.max_risk_per_trade_pct
+                        risk_per_share = abs(signal.target_entry_price - signal.stop_loss)
+                        raw_qty = int(risk_amount / risk_per_share) if risk_per_share > Decimal("0.0") else 0
+                        max_capital_qty = int((self.cash * Decimal("0.20")) / signal.target_entry_price)
+                        qty = max(1, min(raw_qty, max_capital_qty))
+
+                        notional = Decimal(str(qty)) * signal.target_entry_price
+                        # Reserve capital atomically
+                        res = self.reservation_service.reserve_capital(
+                            reservation_id=f"RES-{uuid.uuid4().hex[:8]}",
+                            account_id="PAPER_ACC_01",
+                            idempotency_key=f"IDEM-{signal.signal_id}",
+                            strategy_id=signal.strategy_id,
+                            symbol=symbol,
+                            quantity=qty,
+                            price=signal.target_entry_price,
+                            get_available_capital=lambda acc: self.cash,
+                        )
+
+                        if res["outcome"] == ReservationOutcome.RESERVED:
+                            # Order creation
+                            order_id = f"ORD-{uuid.uuid4().hex[:8]}"
+                            order = self.gateway.create_order(
+                                order_id=order_id,
                                 idempotency_key=f"IDEM-{signal.signal_id}",
                                 strategy_id=signal.strategy_id,
                                 symbol=symbol,
+                                side=signal.side,
+                                order_type=OrderType.LIMIT,
                                 quantity=qty,
                                 price=signal.target_entry_price,
-                                get_available_capital=lambda acc: self.cash,
+                                venue="PAPER",
+                                is_risk_approved=True,
                             )
+                            self.gateway.transition_state(order_id, OrderState.SUBMITTED, "Dispatched to paper execution simulator")
 
-                            if res["outcome"] == ReservationOutcome.RESERVED:
-                                # Order creation
-                                order_id = f"ORD-{uuid.uuid4().hex[:8]}"
-                                order = self.gateway.create_order(
-                                    order_id=order_id,
-                                    idempotency_key=f"IDEM-{signal.signal_id}",
-                                    strategy_id=signal.strategy_id,
-                                    symbol=symbol,
-                                    side=signal.side,
-                                    order_type=OrderType.LIMIT,
-                                    quantity=qty,
-                                    price=signal.target_entry_price,
-                                    venue="PAPER",
-                                    is_risk_approved=True,
-                                )
-                                self.gateway.transition_state(order_id, OrderState.SUBMITTED, "Dispatched to paper execution simulator")
+                            # Evaluate paper fill via fill model
+                            fill_res = self.fill_model.evaluate_limit_entry(
+                                order_id=order_id,
+                                symbol=symbol,
+                                side=signal.side,
+                                quantity=qty,
+                                limit_price=signal.target_entry_price,
+                                bar=bar,
+                                tick_size=tick_size,
+                            )
+                            if fill_res is None:
+                                # Limit order unfilled (market did not penetrate limit)
+                                self.gateway.transition_state(order_id, OrderState.CANCELLED, "Limit order unfilled on bar penetration check; cancelled")
+                                self.reservation_service.release_capital(res["reservation_id"])
+                                self.unfilled_orders += 1
+                                continue
 
-                                # Evaluate paper fill via fill model
-                                fill_res = self.fill_model.evaluate_limit_entry(
-                                    order_id=order_id,
-                                    symbol=symbol,
-                                    side=signal.side,
-                                    quantity=qty,
-                                    limit_price=signal.target_entry_price,
-                                    bar=bar,
-                                    tick_size=tick_size,
-                                )
-
-                                if fill_res is None:
-                                    # Limit order unfilled (market did not penetrate limit)
-                                    self.gateway.transition_state(order_id, OrderState.CANCELLED, "Limit order unfilled on bar penetration check; cancelled")
-                                    self.reservation_service.release_capital(res["reservation_id"], "Limit order unfilled")
-                                    self.unfilled_orders += 1
-                                    continue
+                            # Mark order filled on strategy if callback supported (e.g. ORB daily trade limit)
+                            if hasattr(self.strategy, "mark_order_filled"):
+                                session_date = bar.timestamp_iso[:10]
+                                self.strategy.mark_order_filled(session_date)
 
                                 if fill_res.is_partial_fill:
                                     self.partial_fills += 1
@@ -341,10 +365,11 @@ class HistoricalReplayEngine:
             trade_net = trade_gross - trade_fees - trade_slippage
 
             exit_order_id = f"ORD-EOD-{uuid.uuid4().hex[:8]}"
+            current_strat_id = getattr(self.strategy, "strategy_id", getattr(self.strategy, "STRATEGY_ID", "STRAT_MOMENTUM_BREAKOUT_V1"))
             exit_order = self.gateway.create_order(
                 order_id=exit_order_id,
                 idempotency_key=f"IDEM-{exit_order_id}",
-                strategy_id=self.strategy.STRATEGY_ID,
+                strategy_id=current_strat_id,
                 symbol=symbol,
                 side=exit_side,
                 order_type=OrderType.MARKET,

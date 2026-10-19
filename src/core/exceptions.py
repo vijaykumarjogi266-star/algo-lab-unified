@@ -42,3 +42,13 @@ class MissingTickMetadataError(AlgoLabSecurityError):
     """Raised when an instrument lacks valid, authoritative tick size metadata."""
     pass
 
+
+class InvalidStrategyParameterError(AlgoLabSecurityError):
+    """Raised when strategy parameters violate type, bounds, or logical constraints."""
+    pass
+
+
+class UnknownStrategyError(AlgoLabSecurityError):
+    """Raised when an unregistered or unverified strategy identifier is requested."""
+    pass
+
