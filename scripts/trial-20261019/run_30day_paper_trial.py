@@ -20,9 +20,15 @@ import random
 import sys
 from datetime import datetime, date, timedelta
 
-WORKSPACE_ROOT = Path(__file__).resolve().parent.parent / "algo-lab-unified-trial"
+REPO_ROOT = Path(__file__).resolve().parent.parent.parent
+if (REPO_ROOT / "src").exists():
+    WORKSPACE_ROOT = REPO_ROOT
+else:
+    WORKSPACE_ROOT = REPO_ROOT / "algo-lab-unified-trial"
 sys.path.insert(0, str(WORKSPACE_ROOT))
 
+from src.core.monetary import format_monetary_decimal
+from src.core.tick_precision import InstrumentTickRegistry, quantize_to_tick
 from src.scanner.scanner import MarketBar
 from src.simulation.engine import HistoricalReplayEngine
 
@@ -43,8 +49,9 @@ def generate_session_market_bars(day_index: int, session_date: date) -> dict[str
 
     for sym in symbols:
         bars = []
-        p = base_prices[sym] * (Decimal("1.0") + Decimal(str(random.uniform(-0.02, 0.02))))
-        p = p.quantize(Decimal("0.05"))
+        tick_size = InstrumentTickRegistry.get_tick_size(sym, base_prices[sym])
+        raw_p = base_prices[sym] * (Decimal("1.0") + Decimal(str(random.uniform(-0.02, 0.02))))
+        p = quantize_to_tick(raw_p, tick_size, "NEAREST")
         
         # Determine breakout bar index
         breakout_bar = random.choice([15, 25, 35, 45])
@@ -63,9 +70,9 @@ def generate_session_market_bars(day_index: int, session_date: date) -> dict[str
                 drift = Decimal("0.014") * breakout_direction
 
             open_p = p
-            close_p = (open_p * (Decimal("1.0") + drift)).quantize(Decimal("0.05"))
-            high_p = (max(open_p, close_p) * Decimal("1.002")).quantize(Decimal("0.05"))
-            low_p = (min(open_p, close_p) * Decimal("0.998")).quantize(Decimal("0.05"))
+            close_p = quantize_to_tick(open_p * (Decimal("1.0") + drift), tick_size, "NEAREST")
+            high_p = quantize_to_tick(max(open_p, close_p) * Decimal("1.002"), tick_size, "CEILING")
+            low_p = quantize_to_tick(min(open_p, close_p) * Decimal("0.998"), tick_size, "FLOOR")
             p = close_p
 
             bars.append(MarketBar(
@@ -83,7 +90,7 @@ def generate_session_market_bars(day_index: int, session_date: date) -> dict[str
 
 
 def main() -> int:
-    output_dir = Path(__file__).resolve().parent.parent / "reports"
+    output_dir = REPO_ROOT / "reports" / "trial-20261019"
     output_dir.mkdir(parents=True, exist_ok=True)
     csv_path = output_dir / "daily_trial_metrics.csv"
 
@@ -200,25 +207,26 @@ def main() -> int:
 
     # Write summary JSON for machine audit
     summary_path = output_dir / "paper_trial_summary_metrics.json"
+    summary_payload = {
+        "initial_virtual_capital_inr": format_monetary_decimal(Decimal("100000.00")),
+        "ending_cash_inr": format_monetary_decimal(current_cash),
+        "net_realized_pnl_inr": format_monetary_decimal(net_pnl_total),
+        "net_return_pct": float((net_pnl_total / Decimal("1000.0")).quantize(Decimal("0.01"))),
+        "gross_realized_pnl_inr": format_monetary_decimal(total_gross),
+        "total_statutory_fees_inr": format_monetary_decimal(total_fees),
+        "total_slippage_inr": format_monetary_decimal(total_slippage),
+        "total_friction_inr": format_monetary_decimal(total_friction),
+        "peak_equity_inr": format_monetary_decimal(peak_equity),
+        "max_drawdown_pct": float(max_drawdown),
+        "total_trades": total_trades,
+        "winning_trades": total_wins,
+        "losing_trades": total_losses,
+        "win_rate_pct": float(win_rate),
+        "all_sessions_balanced": all_balanced,
+        "discrepancies_count": 0 if all_balanced else 1,
+    }
     with open(summary_path, "w") as jf:
-        json.dump({
-            "initial_virtual_capital_inr": 100000.0,
-            "ending_cash_inr": float(current_cash),
-            "net_realized_pnl_inr": float(net_pnl_total),
-            "net_return_pct": float(net_pnl_total / Decimal("1000.0")),
-            "gross_realized_pnl_inr": float(total_gross),
-            "total_statutory_fees_inr": float(total_fees),
-            "total_slippage_inr": float(total_slippage),
-            "total_friction_inr": float(total_friction),
-            "peak_equity_inr": float(peak_equity),
-            "max_drawdown_pct": float(max_drawdown),
-            "total_trades": total_trades,
-            "winning_trades": total_wins,
-            "losing_trades": total_losses,
-            "win_rate_pct": float(win_rate),
-            "all_sessions_balanced": all_balanced,
-            "discrepancies_count": 0 if all_balanced else 1,
-        }, jf, indent=2)
+        json.dump(summary_payload, jf, indent=2)
 
     return 0 if all_balanced else 1
 

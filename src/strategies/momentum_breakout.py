@@ -16,6 +16,7 @@ from typing import Optional
 import uuid
 
 from src.brokergateway.states import OrderSide
+from src.core.tick_precision import quantize_order_price
 from src.scanner.scanner import MarketBar, ScanCandidate
 from src.strategies.models import StrategySignal
 
@@ -40,14 +41,22 @@ class MomentumBreakoutStrategy:
 
         if candidate.bias == "BULLISH":
             side = OrderSide.BUY
-            stop_loss = candidate.current_price - stop_distance
-            take_profit = candidate.current_price + profit_distance
+            raw_stop = candidate.current_price - stop_distance
+            raw_target = candidate.current_price + profit_distance
+            stop_loss = quantize_order_price(raw_stop, candidate.symbol, side_is_buy=True, order_purpose="STOP_LOSS")
+            take_profit = quantize_order_price(raw_target, candidate.symbol, side_is_buy=True, order_purpose="TAKE_PROFIT")
         elif candidate.bias == "BEARISH":
             side = OrderSide.SELL
-            stop_loss = candidate.current_price + stop_distance
-            take_profit = candidate.current_price - profit_distance
+            raw_stop = candidate.current_price + stop_distance
+            raw_target = candidate.current_price - profit_distance
+            stop_loss = quantize_order_price(raw_stop, candidate.symbol, side_is_buy=False, order_purpose="STOP_LOSS")
+            take_profit = quantize_order_price(raw_target, candidate.symbol, side_is_buy=False, order_purpose="TAKE_PROFIT")
         else:
             return None
+
+        entry_price = quantize_order_price(
+            candidate.current_price, candidate.symbol, side_is_buy=(side == OrderSide.BUY), order_purpose="ENTRY"
+        )
 
         signal_id = f"SIG-{uuid.uuid4().hex[:8].upper()}"
         confidence = min(Decimal("1.0"), candidate.rvol / Decimal("3.0"))
@@ -57,7 +66,7 @@ class MomentumBreakoutStrategy:
             strategy_id=self.STRATEGY_ID,
             symbol=candidate.symbol,
             side=side,
-            target_entry_price=candidate.current_price,
+            target_entry_price=entry_price,
             stop_loss=stop_loss,
             take_profit=take_profit,
             confidence_score=confidence,

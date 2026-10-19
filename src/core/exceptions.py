@@ -31,3 +31,14 @@ class MalformedConfigurationError(AlgoLabSecurityError):
 class RiskApprovalBypassError(AlgoLabSecurityError):
     """Raised when an order signal attempts to bypass centralized risk engine approval."""
     pass
+
+
+class InvalidOrderTickError(AlgoLabSecurityError):
+    """Raised when an order price does not conform to statutory instrument tick size."""
+    pass
+
+
+class MissingTickMetadataError(AlgoLabSecurityError):
+    """Raised when an instrument lacks valid, authoritative tick size metadata."""
+    pass
+

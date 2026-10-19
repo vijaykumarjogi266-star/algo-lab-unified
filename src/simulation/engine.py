@@ -23,6 +23,7 @@ from src.capitalreservation.models import ReservationOutcome
 from src.capitalreservation.service import CapitalReservationService
 from src.eodreconciler.models import EODReconciliationReport, PositionBalance
 from src.eodreconciler.reconciler import EODReconciler
+from src.core.tick_precision import quantize_order_price
 from src.scanner.scanner import IntradayMarketScanner, MarketBar
 from src.simulation.fee_model import NSEFrictionModel
 from src.strategies.momentum_breakout import MomentumBreakoutStrategy
@@ -112,7 +113,13 @@ class HistoricalReplayEngine:
                     tp_hit = bar.high >= pos["take_profit"] if pos["side"] == OrderSide.BUY else bar.low <= pos["take_profit"]
 
                     if sl_hit:
-                        exit_price = pos["stop_loss"]
+                        # Gap check: execute at open if bar opened through/beyond stop loss
+                        if pos["side"] == OrderSide.BUY and bar.open <= pos["stop_loss"]:
+                            exit_price = quantize_order_price(bar.open, symbol, side_is_buy=False, order_purpose="STOP_LOSS")
+                        elif pos["side"] == OrderSide.SELL and bar.open >= pos["stop_loss"]:
+                            exit_price = quantize_order_price(bar.open, symbol, side_is_buy=True, order_purpose="STOP_LOSS")
+                        else:
+                            exit_price = pos["stop_loss"]
                         exit_reason = "STOP_LOSS"
                     elif tp_hit:
                         exit_price = pos["take_profit"]
@@ -275,9 +282,14 @@ class HistoricalReplayEngine:
         # Force EOD square-off for remaining open positions
         for symbol, pos in list(open_positions.items()):
             last_bar = symbol_history[symbol][-1]
-            exit_price = last_bar.close
-            qty = pos["quantity"]
             exit_side = OrderSide.SELL if pos["side"] == OrderSide.BUY else OrderSide.BUY
+            exit_price = quantize_order_price(
+                last_bar.close,
+                symbol,
+                side_is_buy=(exit_side == OrderSide.BUY),
+                order_purpose="ENTRY",
+            )
+            qty = pos["quantity"]
             trade_gross = (exit_price - pos["entry_price"]) * Decimal(str(qty)) if pos["side"] == OrderSide.BUY else (pos["entry_price"] - exit_price) * Decimal(str(qty))
 
             exit_friction = NSEFrictionModel.calculate_friction(exit_side.value, qty, exit_price)

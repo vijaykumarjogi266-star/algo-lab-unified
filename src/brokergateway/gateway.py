@@ -18,8 +18,9 @@ from typing import Any, Dict, List, Optional, Set
 from src.brokergateway.models import ExecutionFill, ExecutionOrder, StateTransitionRecord, utc_now_iso
 from src.brokergateway.safety_guard import OrderDispatchSafetyGuard
 from src.brokergateway.states import OrderSide, OrderState, OrderType, UncertaintyResolutionStatus
-from src.core.exceptions import AlgoLabSecurityError, BrokerExecutionBlockedError
+from src.core.exceptions import AlgoLabSecurityError, BrokerExecutionBlockedError, InvalidOrderTickError
 from src.core.logging import get_logger
+from src.core.tick_precision import InstrumentTickRegistry, is_valid_tick
 
 logger = get_logger(__name__)
 
@@ -128,6 +129,15 @@ class BrokerGateway:
             "real_money": False,
         }
         OrderDispatchSafetyGuard.intercept_order_intent(intent_payload)
+
+        # 2b. Authoritative Exchange Tick Precision Validation
+        if price is not None:
+            tick_size = InstrumentTickRegistry.get_tick_size(symbol, price)
+            if not is_valid_tick(price, tick_size):
+                raise InvalidOrderTickError(
+                    f"Off-tick order price rejected: order {order_id} price {price} "
+                    f"for {symbol} is not a valid multiple of statutory tick size {tick_size}."
+                )
 
         # 3. Instantiate Order
         order = ExecutionOrder(

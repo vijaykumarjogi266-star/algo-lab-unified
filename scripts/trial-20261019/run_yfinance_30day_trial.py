@@ -20,17 +20,24 @@ import os
 from pathlib import Path
 import sys
 
-WORKSPACE_ROOT = Path(__file__).resolve().parent.parent / "algo-lab-unified-trial"
+REPO_ROOT = Path(__file__).resolve().parent.parent.parent
+if (REPO_ROOT / "src").exists():
+    WORKSPACE_ROOT = REPO_ROOT
+else:
+    WORKSPACE_ROOT = REPO_ROOT / "algo-lab-unified-trial"
 sys.path.insert(0, str(WORKSPACE_ROOT))
 
+from src.core.monetary import format_monetary_decimal
 from src.scanner.scanner import MarketBar
 from src.simulation.engine import HistoricalReplayEngine
 
 
 def main() -> int:
-    workspace_dir = Path(__file__).resolve().parent.parent
+    workspace_dir = REPO_ROOT
     data_path = workspace_dir / "data" / "yfinance_nse_5m_30days.json"
-    output_dir = workspace_dir / "reports"
+    if not data_path.exists():
+        data_path = workspace_dir.parent / "data" / "yfinance_nse_5m_30days.json"
+    output_dir = workspace_dir / "reports" / "trial-20261019"
     output_dir.mkdir(parents=True, exist_ok=True)
     csv_path = output_dir / "yfinance_daily_trial_metrics.csv"
 
@@ -165,28 +172,29 @@ def main() -> int:
 
     # Write summary JSON for machine audit
     summary_path = output_dir / "yfinance_trial_summary_metrics.json"
+    summary_payload = {
+        "data_source": "Yahoo Finance (Real 5m NSE OHLCV)",
+        "start_date": sorted_dates[0],
+        "end_date": sorted_dates[-1],
+        "initial_virtual_capital_inr": format_monetary_decimal(Decimal("100000.00")),
+        "ending_cash_inr": format_monetary_decimal(current_cash),
+        "net_realized_pnl_inr": format_monetary_decimal(net_pnl_total),
+        "net_return_pct": float((net_pnl_total / Decimal("1000.0")).quantize(Decimal("0.01"))),
+        "gross_realized_pnl_inr": format_monetary_decimal(total_gross),
+        "total_statutory_fees_inr": format_monetary_decimal(total_fees),
+        "total_slippage_inr": format_monetary_decimal(total_slippage),
+        "total_friction_inr": format_monetary_decimal(total_friction),
+        "peak_equity_inr": format_monetary_decimal(peak_equity),
+        "max_drawdown_pct": float(max_drawdown),
+        "total_trades": total_trades,
+        "winning_trades": total_wins,
+        "losing_trades": total_losses,
+        "win_rate_pct": float(win_rate),
+        "all_sessions_balanced": all_balanced,
+        "discrepancies_count": 0 if all_balanced else 1,
+    }
     with open(summary_path, "w") as jf:
-        json.dump({
-            "data_source": "Yahoo Finance (Real 5m NSE OHLCV)",
-            "start_date": sorted_dates[0],
-            "end_date": sorted_dates[-1],
-            "initial_virtual_capital_inr": 100000.0,
-            "ending_cash_inr": float(current_cash),
-            "net_realized_pnl_inr": float(net_pnl_total),
-            "net_return_pct": float(net_pnl_total / Decimal("1000.0")),
-            "gross_realized_pnl_inr": float(total_gross),
-            "total_statutory_fees_inr": float(total_fees),
-            "total_slippage_inr": float(total_slippage),
-            "total_friction_inr": float(total_friction),
-            "peak_equity_inr": float(peak_equity),
-            "max_drawdown_pct": float(max_drawdown),
-            "total_trades": total_trades,
-            "winning_trades": total_wins,
-            "losing_trades": total_losses,
-            "win_rate_pct": float(win_rate),
-            "all_sessions_balanced": all_balanced,
-            "discrepancies_count": 0 if all_balanced else 1,
-        }, jf, indent=2)
+        json.dump(summary_payload, jf, indent=2)
 
     return 0 if all_balanced else 1
 

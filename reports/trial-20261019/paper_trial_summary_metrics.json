@@ -1,0 +1,18 @@
+{
+  "initial_virtual_capital_inr": "100000.00",
+  "ending_cash_inr": "95334.04",
+  "net_realized_pnl_inr": "-4665.96",
+  "net_return_pct": -4.67,
+  "gross_realized_pnl_inr": "-1674.05",
+  "total_statutory_fees_inr": "2178.77",
+  "total_slippage_inr": "813.14",
+  "total_friction_inr": "2991.91",
+  "peak_equity_inr": "100134.95",
+  "max_drawdown_pct": 4.79,
+  "total_trades": 109,
+  "winning_trades": 36,
+  "losing_trades": 73,
+  "win_rate_pct": 33.0,
+  "all_sessions_balanced": true,
+  "discrepancies_count": 0
+}

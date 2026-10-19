@@ -3,7 +3,9 @@
 from src.core.exceptions import (
     AlgoLabSecurityError,
     BrokerExecutionBlockedError,
+    InvalidOrderTickError,
     MalformedConfigurationError,
+    MissingTickMetadataError,
     RiskApprovalBypassError,
     SecurityInvariantViolation,
     WorkspaceIsolationViolation,
@@ -28,6 +30,14 @@ from src.core.safety_invariants import (
     assert_within_workspace,
     guard_broker_dispatch,
     validate_effective_configuration,
+)
+from src.core.tick_precision import (
+    NSE_TICK_TIERS,
+    InstrumentTickMetadata,
+    InstrumentTickRegistry,
+    is_valid_tick,
+    quantize_order_price,
+    quantize_to_tick,
 )
 
 __all__ = [
@@ -54,4 +64,12 @@ __all__ = [
     "MONETARY_ROUNDING",
     "DEFAULT_MONETARY_PRECISION",
     "KNOWN_MONETARY_KEYS",
+    "NSE_TICK_TIERS",
+    "InstrumentTickMetadata",
+    "InstrumentTickRegistry",
+    "quantize_to_tick",
+    "is_valid_tick",
+    "quantize_order_price",
+    "InvalidOrderTickError",
+    "MissingTickMetadataError",
 ]
