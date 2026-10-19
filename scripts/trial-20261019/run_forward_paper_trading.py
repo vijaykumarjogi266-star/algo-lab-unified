@@ -35,6 +35,7 @@ from src.brokergateway.safety_guard import OrderDispatchSafetyGuard
 from src.brokergateway.states import OrderSide, OrderType, OrderState
 from src.capitalreservation.models import ReservationOutcome
 from src.capitalreservation.service import CapitalReservationService
+from src.core.monetary import assert_no_binary_floats_in_payload, format_monetary_decimal
 from src.core.safety_invariants import assert_paper_only_invariants
 from src.eodreconciler.reconciler import EODReconciler
 from src.scanner.scanner import IntradayMarketScanner, MarketBar
@@ -58,12 +59,14 @@ class ForwardPaperTradingSession:
         max_risk_pct: Decimal = Decimal("0.02"),
         max_daily_trades: int = 6,
         data_dir: Path | None = None,
+        reports_dir: Path | None = None,
+        logs_dir: Path | None = None,
     ):
         self.running = True
         self.workspace_dir = Path(__file__).resolve().parent.parent
         self.data_dir = data_dir or (self.workspace_dir / "data")
-        self.reports_dir = self.workspace_dir / "reports"
-        self.logs_dir = self.workspace_dir / "logs"
+        self.reports_dir = reports_dir or (self.workspace_dir / "reports")
+        self.logs_dir = logs_dir or (self.workspace_dir / "logs")
 
         self.data_dir.mkdir(parents=True, exist_ok=True)
         self.reports_dir.mkdir(parents=True, exist_ok=True)
@@ -232,14 +235,14 @@ class ForwardPaperTradingSession:
             "symbol": symbol,
             "side": pos["side"].value,
             "quantity": qty,
-            "entry_price": float(pos["entry_price"]),
-            "exit_price": float(exit_price),
+            "entry_price": format_monetary_decimal(pos["entry_price"]),
+            "exit_price": format_monetary_decimal(exit_price),
             "entry_time": pos["entry_time"],
             "exit_time": timestamp_iso,
-            "gross_pnl_inr": float(trade_gross),
-            "fees_inr": float(trade_fees),
-            "slippage_inr": float(trade_slippage),
-            "net_pnl_inr": float(trade_net),
+            "gross_pnl_inr": format_monetary_decimal(trade_gross),
+            "fees_inr": format_monetary_decimal(trade_fees),
+            "slippage_inr": format_monetary_decimal(trade_slippage),
+            "net_pnl_inr": format_monetary_decimal(trade_net),
             "exit_reason": reason,
         }
         self.completed_trades.append(record)
@@ -387,24 +390,24 @@ class ForwardPaperTradingSession:
                 "REAL_MONEY_RISK_PAISE": 0,
             },
             "financials": {
-                "initial_capital_inr": float(self.initial_capital),
-                "cash_inr": float(self.cash),
-                "current_equity_inr": float(current_equity),
-                "gross_realized_pnl_inr": float(self.gross_realized_pnl),
-                "total_statutory_fees_inr": float(self.total_fees),
-                "total_slippage_inr": float(self.total_slippage),
-                "total_friction_inr": float(self.total_fees + self.total_slippage),
-                "net_realized_pnl_inr": float(net_realized),
+                "initial_capital_inr": format_monetary_decimal(self.initial_capital),
+                "cash_inr": format_monetary_decimal(self.cash),
+                "current_equity_inr": format_monetary_decimal(current_equity),
+                "gross_realized_pnl_inr": format_monetary_decimal(self.gross_realized_pnl),
+                "total_statutory_fees_inr": format_monetary_decimal(self.total_fees),
+                "total_slippage_inr": format_monetary_decimal(self.total_slippage),
+                "total_friction_inr": format_monetary_decimal(self.total_fees + self.total_slippage),
+                "net_realized_pnl_inr": format_monetary_decimal(net_realized),
             },
             "open_positions": [
                 {
                     "symbol": sym,
                     "side": pos["side"].value,
                     "quantity": pos["quantity"],
-                    "entry_price": float(pos["entry_price"]),
-                    "current_price": float(current_bars[sym].close) if sym in current_bars else float(pos["entry_price"]),
-                    "stop_loss": float(pos["stop_loss"]),
-                    "take_profit": float(pos["take_profit"]),
+                    "entry_price": format_monetary_decimal(pos["entry_price"]),
+                    "current_price": format_monetary_decimal(current_bars[sym].close) if sym in current_bars else format_monetary_decimal(pos["entry_price"]),
+                    "stop_loss": format_monetary_decimal(pos["stop_loss"]),
+                    "take_profit": format_monetary_decimal(pos["take_profit"]),
                     "entry_time": pos["entry_time"],
                 }
                 for sym, pos in self.open_positions.items()
@@ -413,13 +416,16 @@ class ForwardPaperTradingSession:
             "completed_trades": self.completed_trades[-5:],  # Last 5 trades
             "latest_quotes": {
                 sym: {
-                    "close": float(bar.close),
+                    "close": format_monetary_decimal(bar.close),
                     "volume": bar.volume,
                     "timestamp": bar.timestamp_iso,
                 }
                 for sym, bar in current_bars.items()
             },
         }
+
+        # Validate that no binary floating-point numbers leaked into monetary fields
+        assert_no_binary_floats_in_payload(snapshot)
 
         with open(self.snapshot_file, "w") as f:
             json.dump(snapshot, f, indent=2)
