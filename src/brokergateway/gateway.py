@@ -32,7 +32,7 @@ LEGAL_TRANSITIONS: Dict[OrderState, Set[OrderState]] = {
     OrderState.OPEN: {OrderState.PARTIALLY_FILLED, OrderState.FILLED, OrderState.CANCEL_REQUESTED, OrderState.EXPIRED},
     OrderState.PARTIALLY_FILLED: {OrderState.PARTIALLY_FILLED, OrderState.FILLED, OrderState.CANCEL_REQUESTED},
     OrderState.CANCEL_REQUESTED: {OrderState.CANCELLED, OrderState.CANCEL_UNKNOWN, OrderState.PARTIALLY_FILLED, OrderState.FILLED},
-    OrderState.CANCEL_UNKNOWN: {OrderState.CANCELLED, OrderState.PARTIALLY_FILLED, OrderState.FILLED},
+    OrderState.CANCEL_UNKNOWN: {OrderState.OPEN, OrderState.PARTIALLY_FILLED, OrderState.FILLED, OrderState.CANCELLED},
     OrderState.FILLED: set(),      # Terminal state
     OrderState.CANCELLED: set(),   # Terminal state (except late fills handled via audit reconciliation)
     OrderState.REJECTED: set(),    # Terminal state
@@ -250,7 +250,12 @@ class BrokerGateway:
             if order.state == OrderState.SUBMISSION_UNKNOWN:
                 self.transition_state(order_id, OrderState.REJECTED, "Confirmed absent at venue; order rejected")
             elif order.state == OrderState.CANCEL_UNKNOWN:
-                self.transition_state(order_id, OrderState.OPEN, "Cancellation absent at venue; order remains OPEN")
+                if order.filled_quantity >= order.quantity and order.quantity > 0:
+                    self.transition_state(order_id, OrderState.FILLED, "Cancellation absent at venue; order already filled")
+                elif order.filled_quantity > 0:
+                    self.transition_state(order_id, OrderState.PARTIALLY_FILLED, "Cancellation absent at venue; order remains PARTIALLY_FILLED")
+                else:
+                    self.transition_state(order_id, OrderState.OPEN, "Cancellation absent at venue; order remains OPEN")
         elif resolution_status == UncertaintyResolutionStatus.MANUAL_ESCALATION:
             logger.critical("Order %s requires MANUAL OPERATOR INTERVENTION: %s", order_id, evidence)
 
@@ -294,7 +299,7 @@ class BrokerGateway:
             if order.state != OrderState.FILLED:
                 self.transition_state(order.order_id, OrderState.FILLED, f"Filled completely by fill {fill.fill_id}")
         else:
-            if order.state in (OrderState.OPEN, OrderState.SUBMITTED, OrderState.SUBMISSION_UNKNOWN):
+            if order.state in (OrderState.OPEN, OrderState.SUBMITTED, OrderState.SUBMISSION_UNKNOWN, OrderState.CANCEL_UNKNOWN):
                 self.transition_state(order.order_id, OrderState.PARTIALLY_FILLED, f"Partially filled by fill {fill.fill_id}")
 
         # Persist fill

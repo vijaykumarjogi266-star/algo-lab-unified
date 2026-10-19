@@ -10,6 +10,7 @@ from __future__ import annotations
 
 from decimal import Decimal
 import json
+import os
 from pathlib import Path
 import sys
 
@@ -119,7 +120,9 @@ def main() -> int:
         "reconciliation_discrepancies": metrics.reconciliation_discrepancies,
     }
 
-    report_path = Path("/opt/ai-builder/workspaces/algolab-unification-20261019-083200/reports/phase-8/backtest_metrics.json")
+    env_override = os.environ.get("BACKTEST_REPORT_PATH")
+    report_path = Path(env_override) if env_override else Path("/opt/ai-builder/workspaces/algolab-unification-20261019-083200/reports/phase-8/backtest_metrics.json")
+    report_path.parent.mkdir(parents=True, exist_ok=True)
     with open(report_path, "w") as f:
         json.dump(report_dict, f, indent=2)
 
