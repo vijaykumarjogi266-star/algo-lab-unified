@@ -43,19 +43,52 @@ class MomentumBreakoutStrategy:
             side = OrderSide.BUY
             raw_stop = candidate.current_price - stop_distance
             raw_target = candidate.current_price + profit_distance
-            stop_loss = quantize_order_price(raw_stop, candidate.symbol, side_is_buy=True, order_purpose="STOP_LOSS")
-            take_profit = quantize_order_price(raw_target, candidate.symbol, side_is_buy=True, order_purpose="TAKE_PROFIT")
+            stop_loss = quantize_order_price(
+                raw_stop,
+                candidate.symbol,
+                side_is_buy=True,
+                order_purpose="STOP_LOSS",
+                trade_date=candidate.timestamp_iso,
+                reference_price=candidate.current_price,
+            )
+            take_profit = quantize_order_price(
+                raw_target,
+                candidate.symbol,
+                side_is_buy=True,
+                order_purpose="TAKE_PROFIT",
+                trade_date=candidate.timestamp_iso,
+                reference_price=candidate.current_price,
+            )
         elif candidate.bias == "BEARISH":
             side = OrderSide.SELL
             raw_stop = candidate.current_price + stop_distance
             raw_target = candidate.current_price - profit_distance
-            stop_loss = quantize_order_price(raw_stop, candidate.symbol, side_is_buy=False, order_purpose="STOP_LOSS")
-            take_profit = quantize_order_price(raw_target, candidate.symbol, side_is_buy=False, order_purpose="TAKE_PROFIT")
+            stop_loss = quantize_order_price(
+                raw_stop,
+                candidate.symbol,
+                side_is_buy=False,
+                order_purpose="STOP_LOSS",
+                trade_date=candidate.timestamp_iso,
+                reference_price=candidate.current_price,
+            )
+            take_profit = quantize_order_price(
+                raw_target,
+                candidate.symbol,
+                side_is_buy=False,
+                order_purpose="TAKE_PROFIT",
+                trade_date=candidate.timestamp_iso,
+                reference_price=candidate.current_price,
+            )
         else:
             return None
 
         entry_price = quantize_order_price(
-            candidate.current_price, candidate.symbol, side_is_buy=(side == OrderSide.BUY), order_purpose="ENTRY"
+            candidate.current_price,
+            candidate.symbol,
+            side_is_buy=(side == OrderSide.BUY),
+            order_purpose="ENTRY",
+            trade_date=candidate.timestamp_iso,
+            reference_price=candidate.current_price,
         )
 
         signal_id = f"SIG-{uuid.uuid4().hex[:8].upper()}"

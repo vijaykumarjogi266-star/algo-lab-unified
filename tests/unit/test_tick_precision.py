@@ -251,3 +251,75 @@ class TestStrategySignalTickQuantization:
         assert signal.stop_loss == Decimal("2487.70")
         # raw_target = 2500.13 + 24.69134 = 2524.82134 -> floored to 2524.80
         assert signal.take_profit == Decimal("2524.80")
+
+
+class TestHistoricalTickMasterRegimes:
+    """Tests date-aware resolution across historical statutory NSE regimes."""
+
+    def test_pre_2024_uniform_regime(self):
+        """Prior to June 10, 2024, all equities must resolve to INR 0.05 uniform tick."""
+        from src.core.tick_precision import HistoricalSecurityTickMaster, CIRCULAR_PRE_2024
+        meta = HistoricalSecurityTickMaster.get_tick_metadata("RELIANCE", "2024-01-15")
+        assert meta.tick_size == Decimal("0.05")
+        assert meta.circular_reference == CIRCULAR_PRE_2024
+        assert meta.regime == "UNIFORM_5PAISE"
+
+        meta_infy = HistoricalSecurityTickMaster.get_tick_metadata("INFY", "2023-08-01")
+        assert meta_infy.tick_size == Decimal("0.05")
+
+    def test_two_tier_regime_circular_62174(self):
+        """Between June 10, 2024 and April 14, 2025, circular 62174 creates 2 tiers (<250 -> 0.01, >=250 -> 0.05)."""
+        from src.core.tick_precision import HistoricalSecurityTickMaster, CIRCULAR_62174
+        # Below 250
+        meta_low = HistoricalSecurityTickMaster.get_tick_metadata("SUB250_SYM", "2024-08-01", reference_price=Decimal("180.00"))
+        assert meta_low.tick_size == Decimal("0.01")
+        assert meta_low.circular_reference == CIRCULAR_62174
+        assert meta_low.regime == "TWO_TIER_250"
+
+        # Above 250
+        meta_high = HistoricalSecurityTickMaster.get_tick_metadata("HIGH_SYM", "2024-08-01", reference_price=Decimal("1500.00"))
+        assert meta_high.tick_size == Decimal("0.05")
+        assert meta_high.circular_reference == CIRCULAR_62174
+
+    def test_multi_tier_regime_circular_67133(self):
+        """From April 15, 2025 onwards, circular 67133 establishes multi-tier schedule."""
+        from src.core.tick_precision import HistoricalSecurityTickMaster, CIRCULAR_67133
+        meta_rel = HistoricalSecurityTickMaster.get_tick_metadata("RELIANCE", "2026-09-04")
+        assert meta_rel.tick_size == Decimal("0.10")
+        assert meta_rel.circular_reference == CIRCULAR_67133
+        assert meta_rel.regime == "MULTI_TIER_CMTR_67133"
+
+    def test_date_aware_quantize_order_price(self):
+        """quantize_order_price resolves tick size corresponding to trade_date."""
+        # On 2024-01-15: RELIANCE tick size is 0.05
+        p_old = quantize_order_price(Decimal("2500.12"), "RELIANCE", side_is_buy=True, order_purpose="ENTRY", trade_date="2024-01-15")
+        assert p_old == Decimal("2500.10")  # multiple of 0.05
+
+        p_off = quantize_order_price(Decimal("2500.07"), "RELIANCE", side_is_buy=True, order_purpose="ENTRY", trade_date="2024-01-15")
+        assert p_off == Decimal("2500.05")
+
+        # On 2026-09-04: RELIANCE tick size is 0.10
+        p_new = quantize_order_price(Decimal("2500.07"), "RELIANCE", side_is_buy=True, order_purpose="ENTRY", trade_date="2026-09-04")
+        assert p_new == Decimal("2500.00")  # floored to multiple of 0.10
+
+    def test_fail_closed_on_missing_reference_price_for_unknown(self):
+        """Unknown symbol on date >= 2024-06-10 without reference price must raise MissingTickMetadataError."""
+        from src.core.tick_precision import HistoricalSecurityTickMaster
+        with pytest.raises(MissingTickMetadataError):
+            HistoricalSecurityTickMaster.get_tick_metadata("UNKNOWN_SYM", "2026-09-04")
+
+    def test_fail_closed_on_invalid_date(self):
+        """Invalid date strings must raise MissingTickMetadataError."""
+        from src.core.tick_precision import HistoricalSecurityTickMaster
+        with pytest.raises(MissingTickMetadataError):
+            HistoricalSecurityTickMaster.get_tick_metadata("RELIANCE", "INVALID_DATE")
+
+    def test_provenance_record_format(self):
+        """Provenance records must contain auditable metadata fields."""
+        from src.core.tick_precision import HistoricalSecurityTickMaster
+        prov = HistoricalSecurityTickMaster.get_provenance("RELIANCE", "2026-09-04")
+        assert prov["symbol"] == "RELIANCE"
+        assert prov["trade_date"] == "2026-09-04"
+        assert prov["statutory_tick_size_inr"] == "0.10"
+        assert prov["statutory_circular"] == "NSE/CMTR/67133"
+        assert "provenance_source" in prov

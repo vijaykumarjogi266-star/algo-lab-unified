@@ -172,7 +172,11 @@ def main() -> int:
 
     # Write summary JSON for machine audit
     summary_path = output_dir / "yfinance_trial_summary_metrics.json"
+    conservation_delta = current_cash - Decimal("100000.00") - net_pnl_total
     summary_payload = {
+        "candidate": "Candidate 2 (Hardened: Historical Tick Rules & Realistic Paper Fills)",
+        "fill_mode": "REALISTIC_PENETRATION",
+        "statutory_circular": "NSE/CMTR/67133",
         "data_source": "Yahoo Finance (Real 5m NSE OHLCV)",
         "start_date": sorted_dates[0],
         "end_date": sorted_dates[-1],
@@ -190,8 +194,12 @@ def main() -> int:
         "winning_trades": total_wins,
         "losing_trades": total_losses,
         "win_rate_pct": float(win_rate),
+        "unfilled_limit_orders": getattr(metrics, "unfilled_orders_count", 0),
+        "partial_fills_count": getattr(metrics, "partial_fills_count", 0),
+        "accounting_conservation_delta": format_monetary_decimal(conservation_delta),
         "all_sessions_balanced": all_balanced,
         "discrepancies_count": 0 if all_balanced else 1,
+        "tick_provenance": getattr(metrics, "tick_metadata_provenance", {}),
     }
     with open(summary_path, "w") as jf:
         json.dump(summary_payload, jf, indent=2)

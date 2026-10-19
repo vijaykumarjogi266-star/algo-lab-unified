@@ -33,6 +33,8 @@ from src.core.safety_invariants import (
 )
 from src.core.tick_precision import (
     NSE_TICK_TIERS,
+    HistoricalSecurityTickMaster,
+    HistoricalTickMetadata,
     InstrumentTickMetadata,
     InstrumentTickRegistry,
     is_valid_tick,
@@ -66,7 +68,9 @@ __all__ = [
     "KNOWN_MONETARY_KEYS",
     "NSE_TICK_TIERS",
     "InstrumentTickMetadata",
+    "HistoricalTickMetadata",
     "InstrumentTickRegistry",
+    "HistoricalSecurityTickMaster",
     "quantize_to_tick",
     "is_valid_tick",
     "quantize_order_price",

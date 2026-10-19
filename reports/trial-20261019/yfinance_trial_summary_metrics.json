@@ -1,4 +1,7 @@
 {
+  "candidate": "Candidate 2 (Hardened: Historical Tick Rules & Realistic Paper Fills)",
+  "fill_mode": "REALISTIC_PENETRATION",
+  "statutory_circular": "NSE/CMTR/67133",
   "data_source": "Yahoo Finance (Real 5m NSE OHLCV)",
   "start_date": "2026-09-04",
   "end_date": "2026-10-19",
@@ -16,6 +19,55 @@
   "winning_trades": 159,
   "losing_trades": 317,
   "win_rate_pct": 33.4,
+  "unfilled_limit_orders": 0,
+  "partial_fills_count": 0,
+  "accounting_conservation_delta": "0.00",
   "all_sessions_balanced": true,
-  "discrepancies_count": 0
+  "discrepancies_count": 0,
+  "tick_provenance": {
+    "RELIANCE": {
+      "symbol": "RELIANCE",
+      "trade_date": "2026-10-19",
+      "statutory_tick_size_inr": "0.10",
+      "statutory_circular": "NSE/CMTR/67133",
+      "regime": "MULTI_TIER_CMTR_67133",
+      "effective_from": "2025-04-15",
+      "price_band": "[1000.00, 5000.00)",
+      "monthly_reference_price": "1187.00",
+      "provenance_source": "NSE Circular NSE/CMTR/67133 (Effective 2025-04-15)"
+    },
+    "INFY": {
+      "symbol": "INFY",
+      "trade_date": "2026-10-19",
+      "statutory_tick_size_inr": "0.10",
+      "statutory_circular": "NSE/CMTR/67133",
+      "regime": "MULTI_TIER_CMTR_67133",
+      "effective_from": "2025-04-15",
+      "price_band": "[1000.00, 5000.00)",
+      "monthly_reference_price": "1050.00",
+      "provenance_source": "NSE Circular NSE/CMTR/67133 (Effective 2025-04-15)"
+    },
+    "TCS": {
+      "symbol": "TCS",
+      "trade_date": "2026-10-19",
+      "statutory_tick_size_inr": "0.10",
+      "statutory_circular": "NSE/CMTR/67133",
+      "regime": "MULTI_TIER_CMTR_67133",
+      "effective_from": "2025-04-15",
+      "price_band": "[1000.00, 5000.00)",
+      "monthly_reference_price": "2050.60",
+      "provenance_source": "NSE Circular NSE/CMTR/67133 (Effective 2025-04-15)"
+    },
+    "HDFCBANK": {
+      "symbol": "HDFCBANK",
+      "trade_date": "2026-10-19",
+      "statutory_tick_size_inr": "0.05",
+      "statutory_circular": "NSE/CMTR/67133",
+      "regime": "MULTI_TIER_CMTR_67133",
+      "effective_from": "2025-04-15",
+      "price_band": "[250.00, 1000.00)",
+      "monthly_reference_price": "708.70",
+      "provenance_source": "NSE Circular NSE/CMTR/67133 (Effective 2025-04-15)"
+    }
+  }
 }

@@ -23,9 +23,10 @@ from src.capitalreservation.models import ReservationOutcome
 from src.capitalreservation.service import CapitalReservationService
 from src.eodreconciler.models import EODReconciliationReport, PositionBalance
 from src.eodreconciler.reconciler import EODReconciler
-from src.core.tick_precision import quantize_order_price
+from src.core.tick_precision import HistoricalSecurityTickMaster, quantize_order_price
 from src.scanner.scanner import IntradayMarketScanner, MarketBar
 from src.simulation.fee_model import NSEFrictionModel
+from src.simulation.fill_model import RealisticPaperFillModel
 from src.strategies.momentum_breakout import MomentumBreakoutStrategy
 
 
@@ -48,6 +49,10 @@ class SimulationMetrics:
     rejected_signals_count: int
     is_eod_balanced: bool
     reconciliation_discrepancies: List[str] = field(default_factory=list)
+    unfilled_orders_count: int = 0
+    partial_fills_count: int = 0
+    fill_mode: str = "REALISTIC_PENETRATION"
+    tick_metadata_provenance: Dict[str, Any] = field(default_factory=dict)
 
 
 class HistoricalReplayEngine:
@@ -57,10 +62,14 @@ class HistoricalReplayEngine:
         self,
         initial_capital: Decimal = Decimal("500000.00"),  # 5 Lakh INR paper capital
         max_risk_per_trade_pct: Decimal = Decimal("0.02"),  # 2% risk ceiling
+        fill_mode: str = "REALISTIC_PENETRATION",
+        fill_model: Optional[RealisticPaperFillModel] = None,
     ):
         self.initial_capital = initial_capital
         self.cash = initial_capital
         self.max_risk_per_trade_pct = max_risk_per_trade_pct
+        self.fill_mode = fill_mode
+        self.fill_model = fill_model or RealisticPaperFillModel(mode=fill_mode)
 
         self.scanner = IntradayMarketScanner()
         self.strategy = MomentumBreakoutStrategy()
@@ -70,7 +79,10 @@ class HistoricalReplayEngine:
 
         self.trades: List[Dict[str, Any]] = []
         self.rejected_signals: int = 0
+        self.unfilled_orders: int = 0
+        self.partial_fills: int = 0
         self.equity_curve: List[Decimal] = [initial_capital]
+        self.provenance_records: Dict[str, Any] = {}
 
     def run_replay(
         self,
@@ -101,6 +113,13 @@ class HistoricalReplayEngine:
                 if not current_bars:
                     continue
                 bar = current_bars[0]
+                tick_size = HistoricalSecurityTickMaster.get_tick_metadata(
+                    symbol, trade_date=bar.timestamp_iso, reference_price=bar.close
+                ).tick_size
+                if symbol not in self.provenance_records:
+                    self.provenance_records[symbol] = HistoricalSecurityTickMaster.get_provenance(
+                        symbol, trade_date=bar.timestamp_iso, reference_price=bar.close
+                    )
 
                 # Check exits on open positions
                 if symbol in open_positions:
@@ -108,22 +127,14 @@ class HistoricalReplayEngine:
                     exit_price: Optional[Decimal] = None
                     exit_reason: Optional[str] = None
 
-                    # Conservative collision check: if bar touches both SL and TP, SL is triggered
-                    sl_hit = bar.low <= pos["stop_loss"] if pos["side"] == OrderSide.BUY else bar.high >= pos["stop_loss"]
-                    tp_hit = bar.high >= pos["take_profit"] if pos["side"] == OrderSide.BUY else bar.low <= pos["take_profit"]
+                    sl_res = self.fill_model.evaluate_stop_loss_exit(symbol, pos["side"], pos["stop_loss"], bar, tick_size)
+                    tp_res = self.fill_model.evaluate_take_profit_exit(symbol, pos["side"], pos["take_profit"], bar, tick_size)
 
-                    if sl_hit:
-                        # Gap check: execute at open if bar opened through/beyond stop loss
-                        if pos["side"] == OrderSide.BUY and bar.open <= pos["stop_loss"]:
-                            exit_price = quantize_order_price(bar.open, symbol, side_is_buy=False, order_purpose="STOP_LOSS")
-                        elif pos["side"] == OrderSide.SELL and bar.open >= pos["stop_loss"]:
-                            exit_price = quantize_order_price(bar.open, symbol, side_is_buy=True, order_purpose="STOP_LOSS")
-                        else:
-                            exit_price = pos["stop_loss"]
-                        exit_reason = "STOP_LOSS"
-                    elif tp_hit:
-                        exit_price = pos["take_profit"]
-                        exit_reason = "TAKE_PROFIT"
+                    # Conservative collision check: if bar touches both SL and TP, SL is triggered
+                    if sl_res:
+                        exit_price, exit_reason = sl_res
+                    elif tp_res:
+                        exit_price, exit_reason = tp_res
 
                     if exit_price:
                         # Close position
@@ -242,24 +253,51 @@ class HistoricalReplayEngine:
                                 )
                                 self.gateway.transition_state(order_id, OrderState.SUBMITTED, "Dispatched to paper execution simulator")
 
-                                # Simulate instantaneous paper fill
-                                entry_friction = NSEFrictionModel.calculate_friction(signal.side.value, qty, signal.target_entry_price)
-                                fill = ExecutionFill(
-                                    fill_id=f"FILL-ENTRY-{uuid.uuid4().hex[:8]}",
+                                # Evaluate paper fill via fill model
+                                fill_res = self.fill_model.evaluate_limit_entry(
                                     order_id=order_id,
                                     symbol=symbol,
                                     side=signal.side,
                                     quantity=qty,
-                                    price=signal.target_entry_price,
+                                    limit_price=signal.target_entry_price,
+                                    bar=bar,
+                                    tick_size=tick_size,
+                                )
+
+                                if fill_res is None:
+                                    # Limit order unfilled (market did not penetrate limit)
+                                    self.gateway.transition_state(order_id, OrderState.CANCELLED, "Limit order unfilled on bar penetration check; cancelled")
+                                    self.reservation_service.release_capital(res["reservation_id"], "Limit order unfilled")
+                                    self.unfilled_orders += 1
+                                    continue
+
+                                if fill_res.is_partial_fill:
+                                    self.partial_fills += 1
+
+                                filled_qty = fill_res.filled_quantity
+                                fill_price = fill_res.fill_price
+                                entry_friction = fill_res.friction
+
+                                fill = ExecutionFill(
+                                    fill_id=fill_res.fill_id,
+                                    order_id=order_id,
+                                    symbol=symbol,
+                                    side=signal.side,
+                                    quantity=filled_qty,
+                                    price=fill_price,
                                     transaction_cost=entry_friction.total_transaction_cost,
                                     slippage_cost=entry_friction.slippage,
                                 )
                                 self.gateway.process_fill(fill)
 
+                                if fill_res.is_partial_fill:
+                                    self.gateway.transition_state(order_id, OrderState.CANCELLED, f"Cancelled remaining unfilled {fill_res.unfilled_quantity} shares")
+
+                                actual_notional = Decimal(str(filled_qty)) * fill_price
                                 if signal.side == OrderSide.BUY:
-                                    self.cash -= (notional + entry_friction.total_transaction_cost + entry_friction.slippage)
+                                    self.cash -= (actual_notional + entry_friction.total_transaction_cost + entry_friction.slippage)
                                 else:
-                                    self.cash += (notional - entry_friction.total_transaction_cost - entry_friction.slippage)
+                                    self.cash += (actual_notional - entry_friction.total_transaction_cost - entry_friction.slippage)
                                 total_fees += entry_friction.total_transaction_cost
                                 total_slippage += entry_friction.slippage
 
@@ -267,8 +305,8 @@ class HistoricalReplayEngine:
                                     "order_id": order_id,
                                     "reservation_id": res["reservation_id"],
                                     "side": signal.side,
-                                    "quantity": qty,
-                                    "entry_price": signal.target_entry_price,
+                                    "quantity": filled_qty,
+                                    "entry_price": fill_price,
                                     "entry_friction": entry_friction,
                                     "stop_loss": signal.stop_loss,
                                     "take_profit": signal.take_profit,
@@ -283,11 +321,15 @@ class HistoricalReplayEngine:
         for symbol, pos in list(open_positions.items()):
             last_bar = symbol_history[symbol][-1]
             exit_side = OrderSide.SELL if pos["side"] == OrderSide.BUY else OrderSide.BUY
+            eod_tick_size = HistoricalSecurityTickMaster.get_tick_metadata(
+                symbol, last_bar.timestamp_iso, last_bar.close
+            ).tick_size
             exit_price = quantize_order_price(
                 last_bar.close,
                 symbol,
                 side_is_buy=(exit_side == OrderSide.BUY),
                 order_purpose="ENTRY",
+                tick_size=eod_tick_size,
             )
             qty = pos["quantity"]
             trade_gross = (exit_price - pos["entry_price"]) * Decimal(str(qty)) if pos["side"] == OrderSide.BUY else (pos["entry_price"] - exit_price) * Decimal(str(qty))
@@ -399,4 +441,8 @@ class HistoricalReplayEngine:
             rejected_signals_count=self.rejected_signals,
             is_eod_balanced=eod_report.is_balanced,
             reconciliation_discrepancies=eod_report.discrepancies,
+            unfilled_orders_count=self.unfilled_orders,
+            partial_fills_count=self.partial_fills,
+            fill_mode=self.fill_mode,
+            tick_metadata_provenance=self.provenance_records,
         )
