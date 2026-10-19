@@ -1,0 +1,45 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+.venv*/
+env/
+venv/
+ENV/
+
+# Configuration and Secrets
+.env
+.env.local
+.env.*.local
+!.env.example
+!.env.production.example
+
+# Databases and Persistent Ledgers
+*.db
+*.sqlite
+*.sqlite3
+data/*.db
+data/backups/
+data/reports/
+data/decisions/
+data/preflight/
+
+# Logs and runtime traces
+*.log
+logs/
+data/logs/
+
+# Testing and Type Checking
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# OS and Editor artifacts
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
