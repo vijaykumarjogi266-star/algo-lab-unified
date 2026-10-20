@@ -29,6 +29,7 @@ def verify_conservation_equation(
 
     Ending Cash + Cost Basis + Total Friction == Initial Capital + Gross Realized P&L
 
+    For short positions, total_cost_basis represents net asset cost basis minus short sale proceeds.
     Returns (is_balanced, imbalance_amount).
     """
     left_hand_side = ending_cash + total_cost_basis + total_friction

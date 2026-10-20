@@ -58,6 +58,19 @@ class CapitalReservationService:
         get_available_capital: Callable[[str], Decimal],
     ) -> Dict[str, Any]:
         """Reserves capital atomically using SQLite BEGIN EXCLUSIVE transaction."""
+        if quantity <= 0:
+            logger.warning("Reservation rejected: quantity %d must be greater than zero", quantity)
+            return {
+                "outcome": ReservationOutcome.REJECTED,
+                "reason": f"Invalid quantity {quantity}: quantity must be greater than zero",
+            }
+        if price <= Decimal("0.0"):
+            logger.warning("Reservation rejected: price %s must be greater than zero", price)
+            return {
+                "outcome": ReservationOutcome.REJECTED,
+                "reason": f"Invalid price {price}: price must be greater than zero",
+            }
+
         requested_notional = Decimal(str(quantity)) * price
         reserved_cash = requested_notional  # Full cash collateral assumption for paper intraday
 
@@ -208,6 +221,9 @@ class CapitalReservationService:
 
         Prevents margin lockup on partial fills while ensuring exact financial reconciliation.
         """
+        if filled_notional < Decimal("0.0"):
+            raise ValueError(f"Invalid filled_notional {filled_notional}: cannot be negative")
+
         cursor = self.conn.cursor()
         cursor.execute("BEGIN EXCLUSIVE")
         cursor.execute(

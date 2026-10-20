@@ -39,9 +39,42 @@ class EODReconciler:
         """Executes full mathematical reconciliation across cash, fills, and positions."""
         discrepancies: List[str] = []
 
-        # 1. Order & Fill Count Verification
+        # 1. Order & Fill Count Verification and Fill Integrity
         order_count = len(orders)
         fill_count = len(fills)
+
+        seen_fill_ids: set[str] = set()
+        for f in fills:
+            if f.fill_id in seen_fill_ids:
+                discrepancies.append(f"Duplicate fill ID detected: {f.fill_id}")
+            seen_fill_ids.add(f.fill_id)
+
+        if orders:
+            valid_order_ids = {o.order_id for o in orders}
+            for f in fills:
+                if f.order_id not in valid_order_ids:
+                    discrepancies.append(
+                        f"Orphan fill detected: Fill {f.fill_id} references unknown order {f.order_id}"
+                    )
+
+            # 1b. Order Cumulative Filled & Remaining Quantity Verification
+            fills_by_order: Dict[str, int] = {}
+            for f in fills:
+                fills_by_order[f.order_id] = fills_by_order.get(f.order_id, 0) + f.quantity
+
+            for order in orders:
+                actual_fill_sum = fills_by_order.get(order.order_id, 0)
+                if order.filled_quantity != actual_fill_sum:
+                    discrepancies.append(
+                        f"Cumulative quantity mismatch for order {order.order_id}: "
+                        f"Order states {order.filled_quantity} != Sum of fills {actual_fill_sum}"
+                    )
+                expected_remaining = order.quantity - actual_fill_sum
+                if order.remaining_quantity != expected_remaining:
+                    discrepancies.append(
+                        f"Remaining quantity mismatch for order {order.order_id}: "
+                        f"Order states {order.remaining_quantity} != expected {expected_remaining}"
+                    )
 
         # 2. Fee & Friction Verification
         summed_fees = sum((f.transaction_cost for f in fills), Decimal("0.0"))
@@ -72,8 +105,19 @@ class EODReconciler:
                     f"Position quantity mismatch for {symbol}: Ledger qty {pos.quantity} != Net fills qty {expected_qty}"
                 )
 
+        for symbol, net_qty in fill_qty_by_symbol.items():
+            if net_qty != 0 and symbol not in positions:
+                discrepancies.append(
+                    f"Missing position record for symbol {symbol}: Net fills qty {net_qty} but position not recorded"
+                )
+
         # 4. Double-Entry Balance Sheet Conservation Equation
-        total_cost_basis = sum((p.cost_basis for p in positions.values()), Decimal("0.0"))
+        # For long positions (quantity > 0): cash was spent (positive asset cost basis).
+        # For short positions (quantity < 0): cash was received (short liability offset).
+        total_cost_basis = sum(
+            (p.cost_basis if p.quantity >= 0 else -p.cost_basis for p in positions.values()),
+            Decimal("0.0"),
+        )
         is_balanced, imbalance = verify_conservation_equation(
             initial_capital=initial_capital,
             ending_cash=ending_cash,
