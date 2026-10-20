@@ -142,8 +142,14 @@ class HistoricalReplayEngine:
                     sl_res = self.fill_model.evaluate_stop_loss_exit(symbol, pos["side"], pos["stop_loss"], bar, tick_size)
                     tp_res = self.fill_model.evaluate_take_profit_exit(symbol, pos["side"], pos["take_profit"], bar, tick_size)
 
-                    # Conservative collision check: if bar touches both SL and TP, SL is triggered
-                    if sl_res:
+                    # Gap opening priority & conservative collision check:
+                    # 1. If bar opened beyond take-profit, the exit occurred on open before subsequent intraday action
+                    if pos["side"] == OrderSide.BUY and bar.open >= pos["take_profit"]:
+                        exit_price, exit_reason = tp_res or (bar.open, "TAKE_PROFIT_GAP_THROUGH")
+                    elif pos["side"] == OrderSide.SELL and bar.open <= pos["take_profit"]:
+                        exit_price, exit_reason = tp_res or (bar.open, "TAKE_PROFIT_GAP_THROUGH")
+                    # 2. Conservative collision check: if bar touches both SL and TP during intraday range, SL is triggered
+                    elif sl_res:
                         exit_price, exit_reason = sl_res
                     elif tp_res:
                         exit_price, exit_reason = tp_res
@@ -295,49 +301,50 @@ class HistoricalReplayEngine:
                                 session_date = bar.timestamp_iso[:10]
                                 self.strategy.mark_order_filled(session_date)
 
-                                if fill_res.is_partial_fill:
-                                    self.partial_fills += 1
+                            if fill_res.is_partial_fill:
+                                self.partial_fills += 1
 
-                                filled_qty = fill_res.filled_quantity
-                                fill_price = fill_res.fill_price
-                                entry_friction = fill_res.friction
+                            filled_qty = fill_res.filled_quantity
+                            fill_price = fill_res.fill_price
+                            entry_friction = fill_res.friction
 
-                                fill = ExecutionFill(
-                                    fill_id=fill_res.fill_id,
-                                    order_id=order_id,
-                                    symbol=symbol,
-                                    side=signal.side,
-                                    quantity=filled_qty,
-                                    price=fill_price,
-                                    transaction_cost=entry_friction.total_transaction_cost,
-                                    slippage_cost=entry_friction.slippage,
-                                )
-                                self.gateway.process_fill(fill)
+                            fill = ExecutionFill(
+                                fill_id=fill_res.fill_id,
+                                order_id=order_id,
+                                symbol=symbol,
+                                side=signal.side,
+                                quantity=filled_qty,
+                                price=fill_price,
+                                transaction_cost=entry_friction.total_transaction_cost,
+                                slippage_cost=entry_friction.slippage,
+                            )
+                            self.gateway.process_fill(fill)
 
-                                if fill_res.is_partial_fill:
-                                    self.gateway.transition_state(order_id, OrderState.CANCELLED, f"Cancelled remaining unfilled {fill_res.unfilled_quantity} shares")
+                            actual_notional = Decimal(str(filled_qty)) * fill_price
+                            if fill_res.is_partial_fill:
+                                self.gateway.transition_state(order_id, OrderState.CANCELLED, f"Cancelled remaining unfilled {fill_res.unfilled_quantity} shares")
+                                self.reservation_service.consume_partial(res["reservation_id"], actual_notional)
 
-                                actual_notional = Decimal(str(filled_qty)) * fill_price
-                                if signal.side == OrderSide.BUY:
-                                    self.cash -= (actual_notional + entry_friction.total_transaction_cost + entry_friction.slippage)
-                                else:
-                                    self.cash += (actual_notional - entry_friction.total_transaction_cost - entry_friction.slippage)
-                                total_fees += entry_friction.total_transaction_cost
-                                total_slippage += entry_friction.slippage
-
-                                open_positions[symbol] = {
-                                    "order_id": order_id,
-                                    "reservation_id": res["reservation_id"],
-                                    "side": signal.side,
-                                    "quantity": filled_qty,
-                                    "entry_price": fill_price,
-                                    "entry_friction": entry_friction,
-                                    "stop_loss": signal.stop_loss,
-                                    "take_profit": signal.take_profit,
-                                    "entry_time": ts,
-                                }
+                            if signal.side == OrderSide.BUY:
+                                self.cash -= (actual_notional + entry_friction.total_transaction_cost + entry_friction.slippage)
                             else:
-                                self.rejected_signals += 1
+                                self.cash += (actual_notional - entry_friction.total_transaction_cost - entry_friction.slippage)
+                            total_fees += entry_friction.total_transaction_cost
+                            total_slippage += entry_friction.slippage
+
+                            open_positions[symbol] = {
+                                "order_id": order_id,
+                                "reservation_id": res["reservation_id"],
+                                "side": signal.side,
+                                "quantity": filled_qty,
+                                "entry_price": fill_price,
+                                "entry_friction": entry_friction,
+                                "stop_loss": signal.stop_loss,
+                                "take_profit": signal.take_profit,
+                                "entry_time": ts,
+                            }
+                        else:
+                            self.rejected_signals += 1
 
                 symbol_history[symbol].append(bar)
 

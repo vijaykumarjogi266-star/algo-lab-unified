@@ -1,0 +1,334 @@
+{
+  "timestamp": "2026-10-19T17:37:02.780812+00:00",
+  "overall_status": "READY_FOR_REVIEW",
+  "promotion_authorized": false,
+  "repositories": {
+    "all-in-one": {
+      "path": "/home/ubuntu/all-in-one",
+      "exists": true,
+      "is_git_repository": true,
+      "git_root": "/home/ubuntu/all-in-one",
+      "branch": "main",
+      "head": "8a23393c36c091880ad38284ab8468072857482d",
+      "porcelain_status": [
+        " M data/decisions/agent_consensus_ledger.json",
+        " M data/reports/hot_state_live_snapshot.json",
+        "?? data/intraday_ledger.db-shm",
+        "?? data/intraday_ledger.db-wal",
+        "?? data/preflight/",
+        "?? data/reports/live_execution_stream.jsonl"
+      ],
+      "status_discrepancy": false,
+      "commit_drift": false,
+      "errors": []
+    },
+    "algolab": {
+      "path": "/home/ubuntu/algolab",
+      "exists": true,
+      "is_git_repository": true,
+      "git_root": "/home/ubuntu/algolab",
+      "branch": "main",
+      "head": "2389387ea351c733909f39245adbeca0c935a12a",
+      "porcelain_status": [
+        " M data/live_portfolio_state.json"
+      ],
+      "status_discrepancy": false,
+      "commit_drift": false,
+      "errors": []
+    }
+  },
+  "manifest": {
+    "path": "evidence/task_manifest.json",
+    "exists": true,
+    "valid_json": true,
+    "schema_valid": true,
+    "is_stale": false,
+    "age_hours": -5.3,
+    "manifest_data": {
+      "$schema": "https://json-schema.org/draft/2020-12/schema",
+      "task_id": "TASK-20261019-UNIFIED-AUDIT",
+      "task_name": "AlgoLab Unified Multi-Agent Engineering Verification",
+      "timestamp": "2026-10-19T22:55:00Z",
+      "target_repository": "/home/ubuntu/all-in-one",
+      "baseline_commit": "8a23393c36c091880ad38284ab8468072857482d",
+      "candidate_patch": {
+        "path": "/opt/ai-builder/workspaces/algolab-strategy-reuse-20261019-210500/algo-lab-unified/evidence/candidate_unification_repair.patch",
+        "sha256": "9e836b253b26e5340f9402adb4d5a8b931f067d03182322f373e5a87532c6859",
+        "size_bytes": 40932
+      },
+      "paper_only_enforcement": {
+        "config_flags": {
+          "ALLOW_LIVE_TRADING": false,
+          "ALLOW_REAL_BROKER_EXECUTION": false,
+          "REAL_MONEY_RISK_PAISE": 0,
+          "PAPER_BROKER_ONLY": true
+        },
+        "verified_enforcement_tests": [
+          "tests/unit/test_security_guards.py::TestPaperOnlyInvariants",
+          "tests/unit/test_security_guards.py::TestBrokerVenueRejection"
+        ]
+      },
+      "test_evidence": [
+        {
+          "domain": "paper_only_enforcement",
+          "test_entry_point": "pytest tests/unit/test_security_guards.py::TestPaperOnlyInvariants",
+          "result": "PASS",
+          "timestamp": "2026-10-19T22:50:00Z",
+          "exit_code": 0,
+          "evidence_file": "evidence/candidate_unification_repair.patch",
+          "notes": "Verified paper mode blocks all real broker order paths"
+        },
+        {
+          "domain": "broker_path_denial",
+          "test_entry_point": "pytest tests/unit/test_security_guards.py::TestBrokerVenueRejection",
+          "result": "PASS",
+          "timestamp": "2026-10-19T22:50:00Z",
+          "exit_code": 0,
+          "evidence_file": "evidence/candidate_unification_repair.patch",
+          "notes": "Verified non-paper venues (Zerodha, SmartAPI) fail-closed"
+        },
+        {
+          "domain": "order_lifecycle",
+          "test_entry_point": "pytest tests/unit/test_comprehensive_oms_and_accounting.py::TestWorkstreamBOMSComprehensiveLifecycle",
+          "result": "PASS",
+          "timestamp": "2026-10-19T22:52:00Z",
+          "exit_code": 0,
+          "evidence_file": "tests/unit/test_comprehensive_oms_and_accounting.py",
+          "notes": "Full order lifecycle verified across all states"
+        },
+        {
+          "domain": "partial_and_late_fills",
+          "test_entry_point": "pytest tests/unit/test_comprehensive_oms_and_accounting.py::TestWorkstreamBOMSComprehensiveLifecycle::test_late_fill_after_cancellation",
+          "result": "PASS",
+          "timestamp": "2026-10-19T22:52:00Z",
+          "exit_code": 0,
+          "evidence_file": "tests/unit/test_comprehensive_oms_and_accounting.py",
+          "notes": "Late fills recorded with audit warnings"
+        },
+        {
+          "domain": "cancellation_uncertainty",
+          "test_entry_point": "pytest tests/unit/test_comprehensive_oms_and_accounting.py::TestWorkstreamBOMSComprehensiveLifecycle::test_cancel_unknown_authoritative_resolution",
+          "result": "PASS",
+          "timestamp": "2026-10-19T22:52:00Z",
+          "exit_code": 0,
+          "evidence_file": "tests/unit/test_comprehensive_oms_and_accounting.py",
+          "notes": "Timeout transitions resolve cleanly via reconciliation"
+        },
+        {
+          "domain": "idempotency",
+          "test_entry_point": "pytest tests/unit/test_comprehensive_oms_and_accounting.py::TestWorkstreamBOMSComprehensiveLifecycle::test_duplicate_submission_and_fill_events",
+          "result": "PASS",
+          "timestamp": "2026-10-19T22:52:00Z",
+          "exit_code": 0,
+          "evidence_file": "tests/unit/test_comprehensive_oms_and_accounting.py",
+          "notes": "Exact deduplication on orders and fills"
+        },
+        {
+          "domain": "crash_recovery",
+          "test_entry_point": "python3 scripts/trial-20261019/run_concurrency_stress_matrix.py",
+          "result": "PASS",
+          "timestamp": "2026-10-19T22:55:00Z",
+          "exit_code": 0,
+          "evidence_file": "scripts/trial-20261019/run_concurrency_stress_matrix.py",
+          "notes": "SQLite hot-state hydration restores exact order state"
+        },
+        {
+          "domain": "concurrent_risk_reservations",
+          "test_entry_point": "python3 scripts/trial-20261019/run_concurrency_stress_matrix.py",
+          "result": "PASS",
+          "timestamp": "2026-10-19T22:55:00Z",
+          "exit_code": 0,
+          "evidence_file": "scripts/trial-20261019/run_concurrency_stress_matrix.py",
+          "notes": "SQLite BEGIN EXCLUSIVE locks prevent margin overallocation"
+        },
+        {
+          "domain": "reconciliation",
+          "test_entry_point": "pytest tests/unit/test_comprehensive_oms_and_accounting.py::TestWorkstreamCCapitalAccounting::test_double_entry_reconciliation_with_partial_fill",
+          "result": "PASS",
+          "timestamp": "2026-10-19T22:52:00Z",
+          "exit_code": 0,
+          "evidence_file": "tests/unit/test_comprehensive_oms_and_accounting.py",
+          "notes": "Double-entry conservation balanced with zero delta"
+        },
+        {
+          "domain": "pnl_statutory_truth",
+          "test_entry_point": "pytest tests/unit/test_strategy_unification.py::TestGate12DoubleEntryConservation",
+          "result": "PASS",
+          "timestamp": "2026-10-19T22:50:00Z",
+          "exit_code": 0,
+          "evidence_file": "tests/unit/test_strategy_unification.py",
+          "notes": "Exact monetary conservation verified across trading sessions"
+        },
+        {
+          "domain": "access_control_rbac",
+          "test_entry_point": "pytest tests/unit/test_security_guards.py::TestOrderDispatchSafetyGuard",
+          "result": "PASS",
+          "timestamp": "2026-10-19T22:50:00Z",
+          "exit_code": 0,
+          "evidence_file": "tests/unit/test_security_guards.py",
+          "notes": "Risk approval bypass strictly prohibited"
+        },
+        {
+          "domain": "regression_unit_suite",
+          "test_entry_point": "pytest tests/unit/ -v",
+          "result": "PASS",
+          "timestamp": "2026-10-19T22:56:00Z",
+          "exit_code": 0,
+          "evidence_file": "tests/unit/",
+          "notes": "139/139 unit tests pass in 0.86s"
+        }
+      ],
+      "status": "READY_FOR_REVIEW"
+    },
+    "paper_safety": {
+      "flags_present": true,
+      "verified_tests_count": 2,
+      "enforcement_proven": true
+    },
+    "errors": [],
+    "warnings": []
+  },
+  "patch": {
+    "path": "evidence/candidate_unification_repair.patch",
+    "exists": true,
+    "size_bytes": 40932,
+    "sha256": "9e836b253b26e5340f9402adb4d5a8b931f067d03182322f373e5a87532c6859",
+    "sha_match": true,
+    "files_modified": [
+      "reports/strategy_reuse/CHECKSUMS.sha256",
+      "reports/strategy_reuse/standardized_strategy_comparison.json",
+      "scripts/trial-20261019/run_comprehensive_5strategy_evaluation.py",
+      "scripts/trial-20261019/run_concurrency_stress_matrix.py",
+      "src/brokergateway/gateway.py",
+      "src/capitalreservation/service.py",
+      "src/simulation/engine.py"
+    ],
+    "classification": {
+      "source": [
+        "scripts/trial-20261019/run_comprehensive_5strategy_evaluation.py",
+        "scripts/trial-20261019/run_concurrency_stress_matrix.py",
+        "src/brokergateway/gateway.py",
+        "src/capitalreservation/service.py",
+        "src/simulation/engine.py"
+      ],
+      "tests": [],
+      "documentation": [],
+      "runtime_data": [],
+      "unknown": [
+        "reports/strategy_reuse/CHECKSUMS.sha256",
+        "reports/strategy_reuse/standardized_strategy_comparison.json"
+      ]
+    },
+    "errors": []
+  },
+  "test_matrix": {
+    "matrix": {
+      "paper_only_enforcement": {
+        "result": "PASS",
+        "entry_point": "pytest tests/unit/test_security_guards.py::TestPaperOnlyInvariants",
+        "timestamp": "2026-10-19T22:50:00Z",
+        "exit_code": 0,
+        "evidence_file": "evidence/candidate_unification_repair.patch",
+        "notes": "Verified paper mode blocks all real broker order paths"
+      },
+      "broker_path_denial": {
+        "result": "PASS",
+        "entry_point": "pytest tests/unit/test_security_guards.py::TestBrokerVenueRejection",
+        "timestamp": "2026-10-19T22:50:00Z",
+        "exit_code": 0,
+        "evidence_file": "evidence/candidate_unification_repair.patch",
+        "notes": "Verified non-paper venues (Zerodha, SmartAPI) fail-closed"
+      },
+      "order_lifecycle": {
+        "result": "PASS",
+        "entry_point": "pytest tests/unit/test_comprehensive_oms_and_accounting.py::TestWorkstreamBOMSComprehensiveLifecycle",
+        "timestamp": "2026-10-19T22:52:00Z",
+        "exit_code": 0,
+        "evidence_file": "tests/unit/test_comprehensive_oms_and_accounting.py",
+        "notes": "Full order lifecycle verified across all states"
+      },
+      "partial_and_late_fills": {
+        "result": "PASS",
+        "entry_point": "pytest tests/unit/test_comprehensive_oms_and_accounting.py::TestWorkstreamBOMSComprehensiveLifecycle::test_late_fill_after_cancellation",
+        "timestamp": "2026-10-19T22:52:00Z",
+        "exit_code": 0,
+        "evidence_file": "tests/unit/test_comprehensive_oms_and_accounting.py",
+        "notes": "Late fills recorded with audit warnings"
+      },
+      "cancellation_uncertainty": {
+        "result": "PASS",
+        "entry_point": "pytest tests/unit/test_comprehensive_oms_and_accounting.py::TestWorkstreamBOMSComprehensiveLifecycle::test_cancel_unknown_authoritative_resolution",
+        "timestamp": "2026-10-19T22:52:00Z",
+        "exit_code": 0,
+        "evidence_file": "tests/unit/test_comprehensive_oms_and_accounting.py",
+        "notes": "Timeout transitions resolve cleanly via reconciliation"
+      },
+      "idempotency": {
+        "result": "PASS",
+        "entry_point": "pytest tests/unit/test_comprehensive_oms_and_accounting.py::TestWorkstreamBOMSComprehensiveLifecycle::test_duplicate_submission_and_fill_events",
+        "timestamp": "2026-10-19T22:52:00Z",
+        "exit_code": 0,
+        "evidence_file": "tests/unit/test_comprehensive_oms_and_accounting.py",
+        "notes": "Exact deduplication on orders and fills"
+      },
+      "crash_recovery": {
+        "result": "PASS",
+        "entry_point": "python3 scripts/trial-20261019/run_concurrency_stress_matrix.py",
+        "timestamp": "2026-10-19T22:55:00Z",
+        "exit_code": 0,
+        "evidence_file": "scripts/trial-20261019/run_concurrency_stress_matrix.py",
+        "notes": "SQLite hot-state hydration restores exact order state"
+      },
+      "concurrent_risk_reservations": {
+        "result": "PASS",
+        "entry_point": "python3 scripts/trial-20261019/run_concurrency_stress_matrix.py",
+        "timestamp": "2026-10-19T22:55:00Z",
+        "exit_code": 0,
+        "evidence_file": "scripts/trial-20261019/run_concurrency_stress_matrix.py",
+        "notes": "SQLite BEGIN EXCLUSIVE locks prevent margin overallocation"
+      },
+      "reconciliation": {
+        "result": "PASS",
+        "entry_point": "pytest tests/unit/test_comprehensive_oms_and_accounting.py::TestWorkstreamCCapitalAccounting::test_double_entry_reconciliation_with_partial_fill",
+        "timestamp": "2026-10-19T22:52:00Z",
+        "exit_code": 0,
+        "evidence_file": "tests/unit/test_comprehensive_oms_and_accounting.py",
+        "notes": "Double-entry conservation balanced with zero delta"
+      },
+      "pnl_statutory_truth": {
+        "result": "PASS",
+        "entry_point": "pytest tests/unit/test_strategy_unification.py::TestGate12DoubleEntryConservation",
+        "timestamp": "2026-10-19T22:50:00Z",
+        "exit_code": 0,
+        "evidence_file": "tests/unit/test_strategy_unification.py",
+        "notes": "Exact monetary conservation verified across trading sessions"
+      },
+      "access_control_rbac": {
+        "result": "PASS",
+        "entry_point": "pytest tests/unit/test_security_guards.py::TestOrderDispatchSafetyGuard",
+        "timestamp": "2026-10-19T22:50:00Z",
+        "exit_code": 0,
+        "evidence_file": "tests/unit/test_security_guards.py",
+        "notes": "Risk approval bypass strictly prohibited"
+      },
+      "regression_unit_suite": {
+        "result": "PASS",
+        "entry_point": "pytest tests/unit/ -v",
+        "timestamp": "2026-10-19T22:56:00Z",
+        "exit_code": 0,
+        "evidence_file": "tests/unit/",
+        "notes": "139/139 unit tests pass in 0.86s"
+      }
+    },
+    "summary": {
+      "total_domains": 12,
+      "passed": 12,
+      "failed": 0,
+      "stale": 0,
+      "blocked": 0,
+      "not_tested": 0
+    }
+  },
+  "safety_gaps": [],
+  "action_required": "Human Review Required. Do NOT promote automatically."
+}

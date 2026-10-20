@@ -1,0 +1,136 @@
+{
+  "timestamp": "2026-10-19T17:20:05.584081+00:00",
+  "overall_status": "VERIFICATION_FAILED",
+  "promotion_authorized": false,
+  "repositories": {
+    "all-in-one": {
+      "path": "/home/ubuntu/all-in-one",
+      "exists": true,
+      "is_git_repository": true,
+      "git_root": "/home/ubuntu/all-in-one",
+      "branch": "main",
+      "head": "8a23393c36c091880ad38284ab8468072857482d",
+      "porcelain_status": [
+        " M data/decisions/agent_consensus_ledger.json",
+        " M data/reports/hot_state_live_snapshot.json",
+        "?? data/intraday_ledger.db-shm",
+        "?? data/intraday_ledger.db-wal",
+        "?? data/preflight/",
+        "?? data/reports/live_execution_stream.jsonl"
+      ],
+      "status_discrepancy": true,
+      "commit_drift": false,
+      "errors": [
+        "Working tree status drift! Expected 4 entries, found 6"
+      ]
+    },
+    "algolab": {
+      "path": "/home/ubuntu/algolab",
+      "exists": true,
+      "is_git_repository": true,
+      "git_root": "/home/ubuntu/algolab",
+      "branch": "main",
+      "head": "2389387ea351c733909f39245adbeca0c935a12a",
+      "porcelain_status": [
+        " M data/live_portfolio_state.json"
+      ],
+      "status_discrepancy": true,
+      "commit_drift": false,
+      "errors": [
+        "Working tree status drift! Expected 0 entries, found 1"
+      ]
+    }
+  },
+  "manifest": null,
+  "patch": null,
+  "test_matrix": {
+    "matrix": {
+      "paper_only_enforcement": {
+        "result": "NOT_TESTED",
+        "entry_point": null,
+        "timestamp": null,
+        "notes": "No test evidence provided in manifest"
+      },
+      "broker_path_denial": {
+        "result": "NOT_TESTED",
+        "entry_point": null,
+        "timestamp": null,
+        "notes": "No test evidence provided in manifest"
+      },
+      "order_lifecycle": {
+        "result": "NOT_TESTED",
+        "entry_point": null,
+        "timestamp": null,
+        "notes": "No test evidence provided in manifest"
+      },
+      "partial_and_late_fills": {
+        "result": "NOT_TESTED",
+        "entry_point": null,
+        "timestamp": null,
+        "notes": "No test evidence provided in manifest"
+      },
+      "cancellation_uncertainty": {
+        "result": "NOT_TESTED",
+        "entry_point": null,
+        "timestamp": null,
+        "notes": "No test evidence provided in manifest"
+      },
+      "idempotency": {
+        "result": "NOT_TESTED",
+        "entry_point": null,
+        "timestamp": null,
+        "notes": "No test evidence provided in manifest"
+      },
+      "crash_recovery": {
+        "result": "NOT_TESTED",
+        "entry_point": null,
+        "timestamp": null,
+        "notes": "No test evidence provided in manifest"
+      },
+      "concurrent_risk_reservations": {
+        "result": "NOT_TESTED",
+        "entry_point": null,
+        "timestamp": null,
+        "notes": "No test evidence provided in manifest"
+      },
+      "reconciliation": {
+        "result": "NOT_TESTED",
+        "entry_point": null,
+        "timestamp": null,
+        "notes": "No test evidence provided in manifest"
+      },
+      "pnl_statutory_truth": {
+        "result": "NOT_TESTED",
+        "entry_point": null,
+        "timestamp": null,
+        "notes": "No test evidence provided in manifest"
+      },
+      "access_control_rbac": {
+        "result": "NOT_TESTED",
+        "entry_point": null,
+        "timestamp": null,
+        "notes": "No test evidence provided in manifest"
+      },
+      "regression_unit_suite": {
+        "result": "NOT_TESTED",
+        "entry_point": null,
+        "timestamp": null,
+        "notes": "No test evidence provided in manifest"
+      }
+    },
+    "summary": {
+      "total_domains": 12,
+      "passed": 0,
+      "failed": 0,
+      "stale": 0,
+      "blocked": 0,
+      "not_tested": 12
+    }
+  },
+  "safety_gaps": [
+    "Repo all-in-one: Working tree status drift! Expected 4 entries, found 6",
+    "Repo algolab: Working tree status drift! Expected 0 entries, found 1",
+    "12 mandatory safety domains are NOT TESTED!"
+  ],
+  "action_required": "Human Review Required. Do NOT promote automatically."
+}

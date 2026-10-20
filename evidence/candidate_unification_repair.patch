@@ -1,0 +1,856 @@
+diff --git a/reports/strategy_reuse/CHECKSUMS.sha256 b/reports/strategy_reuse/CHECKSUMS.sha256
+index 448f829..852cb07 100644
+--- a/reports/strategy_reuse/CHECKSUMS.sha256
++++ b/reports/strategy_reuse/CHECKSUMS.sha256
+@@ -1,4 +1,4 @@
+-b07c4fc8405a11cfc5557491fc2b0a2c651e78c73dd8864c4dbb386ccf8438f3  standardized_strategy_comparison.json
++357ca1e744a1a7dfbaf024a7d654a9cdebbb6d926fdc3360da193d18f8385437  standardized_strategy_comparison.json
+ 56b26daf11636fdd4009a3ccb314f3fd20f8508c0662918a38a684ce4f9e0102  strategy_inventory.json
+ 3cc7f7a05d87a06e43fa74e4ca7be585b7f06827a9cc1e3419cbdf2174ad7ceb  strategy_inventory.md
+ 540168647bd45949254054d366b3625b8ebcf02eb28e7d0aa2f00bdab9eb5635  test_gates_report.md
+diff --git a/reports/strategy_reuse/standardized_strategy_comparison.json b/reports/strategy_reuse/standardized_strategy_comparison.json
+index 81178d6..21ba980 100644
+--- a/reports/strategy_reuse/standardized_strategy_comparison.json
++++ b/reports/strategy_reuse/standardized_strategy_comparison.json
+@@ -9,17 +9,17 @@
+     {
+       "strategy_id": "STRAT_MOMENTUM_BREAKOUT_V1",
+       "initial_capital_inr": "100000.00",
+-      "ending_cash_inr": "100000.00",
+-      "gross_realized_pnl_inr": "0.00",
+-      "net_realized_pnl_inr": "0.00",
+-      "total_statutory_fees_inr": "0.00",
+-      "total_slippage_inr": "0.00",
+-      "total_friction_inr": "0.00",
+-      "total_trades": 0,
+-      "winning_trades": 0,
+-      "losing_trades": 0,
+-      "win_rate_pct": "0.0%",
+-      "max_drawdown_pct": "0.00%",
++      "ending_cash_inr": "86922.83",
++      "gross_realized_pnl_inr": "-85.05",
++      "net_realized_pnl_inr": "-13077.17",
++      "total_statutory_fees_inr": "9461.15",
++      "total_slippage_inr": "3530.97",
++      "total_friction_inr": "12992.12",
++      "total_trades": 476,
++      "winning_trades": 159,
++      "losing_trades": 317,
++      "win_rate_pct": "33.4%",
++      "max_drawdown_pct": "13.08%",
+       "unfilled_orders": 0,
+       "partial_fills": 0,
+       "all_sessions_balanced": true,
+@@ -28,18 +28,18 @@
+     {
+       "strategy_id": "STRAT_VWAP_REVERSION",
+       "initial_capital_inr": "100000.00",
+-      "ending_cash_inr": "100000.00",
+-      "gross_realized_pnl_inr": "0.00",
+-      "net_realized_pnl_inr": "0.00",
+-      "total_statutory_fees_inr": "0.00",
+-      "total_slippage_inr": "0.00",
+-      "total_friction_inr": "0.00",
+-      "total_trades": 0,
+-      "winning_trades": 0,
+-      "losing_trades": 0,
+-      "win_rate_pct": "0.0%",
+-      "max_drawdown_pct": "0.00%",
+-      "unfilled_orders": 21,
++      "ending_cash_inr": "95985.06",
++      "gross_realized_pnl_inr": "-846.55",
++      "net_realized_pnl_inr": "-4014.94",
++      "total_statutory_fees_inr": "2307.22",
++      "total_slippage_inr": "861.17",
++      "total_friction_inr": "3168.39",
++      "total_trades": 134,
++      "winning_trades": 39,
++      "losing_trades": 95,
++      "win_rate_pct": "29.1%",
++      "max_drawdown_pct": "4.01%",
++      "unfilled_orders": 30,
+       "partial_fills": 0,
+       "all_sessions_balanced": true,
+       "monetary_conservation_delta_inr": "0.00"
+@@ -66,18 +66,18 @@
+     {
+       "strategy_id": "STRAT_SMA_CROSS",
+       "initial_capital_inr": "100000.00",
+-      "ending_cash_inr": "100000.00",
+-      "gross_realized_pnl_inr": "0.00",
+-      "net_realized_pnl_inr": "0.00",
+-      "total_statutory_fees_inr": "0.00",
+-      "total_slippage_inr": "0.00",
+-      "total_friction_inr": "0.00",
+-      "total_trades": 0,
+-      "winning_trades": 0,
+-      "losing_trades": 0,
+-      "win_rate_pct": "0.0%",
+-      "max_drawdown_pct": "0.00%",
+-      "unfilled_orders": 7,
++      "ending_cash_inr": "94671.24",
++      "gross_realized_pnl_inr": "899.35",
++      "net_realized_pnl_inr": "-5328.76",
++      "total_statutory_fees_inr": "4535.59",
++      "total_slippage_inr": "1692.52",
++      "total_friction_inr": "6228.11",
++      "total_trades": 218,
++      "winning_trades": 83,
++      "losing_trades": 135,
++      "win_rate_pct": "38.1%",
++      "max_drawdown_pct": "5.33%",
++      "unfilled_orders": 14,
+       "partial_fills": 0,
+       "all_sessions_balanced": true,
+       "monetary_conservation_delta_inr": "0.00"
+@@ -85,18 +85,18 @@
+     {
+       "strategy_id": "STRAT_DONCHIAN_BREAKOUT",
+       "initial_capital_inr": "100000.00",
+-      "ending_cash_inr": "100000.00",
+-      "gross_realized_pnl_inr": "0.00",
+-      "net_realized_pnl_inr": "0.00",
+-      "total_statutory_fees_inr": "0.00",
+-      "total_slippage_inr": "0.00",
+-      "total_friction_inr": "0.00",
+-      "total_trades": 0,
+-      "winning_trades": 0,
+-      "losing_trades": 0,
+-      "win_rate_pct": "0.0%",
+-      "max_drawdown_pct": "0.00%",
+-      "unfilled_orders": 1,
++      "ending_cash_inr": "97189.51",
++      "gross_realized_pnl_inr": "563.05",
++      "net_realized_pnl_inr": "-2810.49",
++      "total_statutory_fees_inr": "2456.77",
++      "total_slippage_inr": "916.77",
++      "total_friction_inr": "3373.54",
++      "total_trades": 135,
++      "winning_trades": 49,
++      "losing_trades": 86,
++      "win_rate_pct": "36.3%",
++      "max_drawdown_pct": "2.81%",
++      "unfilled_orders": 6,
+       "partial_fills": 0,
+       "all_sessions_balanced": true,
+       "monetary_conservation_delta_inr": "0.00"
+@@ -104,18 +104,18 @@
+     {
+       "strategy_id": "STRAT_BOLLINGER_REVERSION",
+       "initial_capital_inr": "100000.00",
+-      "ending_cash_inr": "100000.00",
+-      "gross_realized_pnl_inr": "0.00",
+-      "net_realized_pnl_inr": "0.00",
+-      "total_statutory_fees_inr": "0.00",
+-      "total_slippage_inr": "0.00",
+-      "total_friction_inr": "0.00",
+-      "total_trades": 0,
+-      "winning_trades": 0,
+-      "losing_trades": 0,
+-      "win_rate_pct": "0.0%",
+-      "max_drawdown_pct": "0.00%",
+-      "unfilled_orders": 23,
++      "ending_cash_inr": "93878.90",
++      "gross_realized_pnl_inr": "-475.20",
++      "net_realized_pnl_inr": "-6121.10",
++      "total_statutory_fees_inr": "4111.44",
++      "total_slippage_inr": "1534.46",
++      "total_friction_inr": "5645.90",
++      "total_trades": 253,
++      "winning_trades": 96,
++      "losing_trades": 157,
++      "win_rate_pct": "37.9%",
++      "max_drawdown_pct": "6.12%",
++      "unfilled_orders": 48,
+       "partial_fills": 0,
+       "all_sessions_balanced": true,
+       "monetary_conservation_delta_inr": "0.00"
+@@ -123,17 +123,17 @@
+     {
+       "strategy_id": "STRAT_TTM_SQUEEZE",
+       "initial_capital_inr": "100000.00",
+-      "ending_cash_inr": "100000.00",
+-      "gross_realized_pnl_inr": "0.00",
+-      "net_realized_pnl_inr": "0.00",
+-      "total_statutory_fees_inr": "0.00",
+-      "total_slippage_inr": "0.00",
+-      "total_friction_inr": "0.00",
+-      "total_trades": 0,
+-      "winning_trades": 0,
+-      "losing_trades": 0,
+-      "win_rate_pct": "0.0%",
+-      "max_drawdown_pct": "0.00%",
++      "ending_cash_inr": "97720.27",
++      "gross_realized_pnl_inr": "344.20",
++      "net_realized_pnl_inr": "-2279.73",
++      "total_statutory_fees_inr": "1910.81",
++      "total_slippage_inr": "713.12",
++      "total_friction_inr": "2623.93",
++      "total_trades": 92,
++      "winning_trades": 27,
++      "losing_trades": 65,
++      "win_rate_pct": "29.3%",
++      "max_drawdown_pct": "2.69%",
+       "unfilled_orders": 2,
+       "partial_fills": 0,
+       "all_sessions_balanced": true,
+@@ -142,18 +142,18 @@
+     {
+       "strategy_id": "STRAT_OMS_HYBRID_ALPHA",
+       "initial_capital_inr": "100000.00",
+-      "ending_cash_inr": "100000.00",
+-      "gross_realized_pnl_inr": "0.00",
+-      "net_realized_pnl_inr": "0.00",
+-      "total_statutory_fees_inr": "0.00",
+-      "total_slippage_inr": "0.00",
+-      "total_friction_inr": "0.00",
+-      "total_trades": 0,
+-      "winning_trades": 0,
+-      "losing_trades": 0,
+-      "win_rate_pct": "0.0%",
+-      "max_drawdown_pct": "0.00%",
+-      "unfilled_orders": 24,
++      "ending_cash_inr": "92392.50",
++      "gross_realized_pnl_inr": "-1775.70",
++      "net_realized_pnl_inr": "-7607.50",
++      "total_statutory_fees_inr": "4246.93",
++      "total_slippage_inr": "1584.87",
++      "total_friction_inr": "5831.80",
++      "total_trades": 212,
++      "winning_trades": 138,
++      "losing_trades": 74,
++      "win_rate_pct": "65.1%",
++      "max_drawdown_pct": "7.61%",
++      "unfilled_orders": 35,
+       "partial_fills": 0,
+       "all_sessions_balanced": true,
+       "monetary_conservation_delta_inr": "0.00"
+diff --git a/scripts/trial-20261019/run_comprehensive_5strategy_evaluation.py b/scripts/trial-20261019/run_comprehensive_5strategy_evaluation.py
+index 419d1ec..70d6971 100644
+--- a/scripts/trial-20261019/run_comprehensive_5strategy_evaluation.py
++++ b/scripts/trial-20261019/run_comprehensive_5strategy_evaluation.py
+@@ -29,7 +29,7 @@ import numpy as np
+ import pandas as pd
+ import yfinance as yf
+ 
+-WORKSPACE_ROOT = Path(__file__).resolve().parent.parent / "algo-lab-unified-trial"
++WORKSPACE_ROOT = Path(__file__).resolve().parent.parent.parent
+ sys.path.insert(0, str(WORKSPACE_ROOT))
+ 
+ from src.core.safety_invariants import assert_paper_only_invariants
+@@ -361,7 +361,8 @@ def run_5strategy_backtest() -> Dict[str, Any]:
+         print(f"{strat:<25} | {m['total_trades']:>6d} | {m['win_rate_pct']:>5.1f}% | ₹{m['gross_pnl_inr']:>10,.2f} | ₹{m['total_friction_inr']:>9,.2f} | ₹{m['net_pnl_inr']:>10,.2f} | {m['profit_factor']:>5.2f} | ₹{m['expectancy_inr']:>7.2f} | {m['max_drawdown_pct']:>7.2f}%")
+     print("=" * 115)
+ 
+-    out_file = Path(__file__).resolve().parent.parent / "reports" / "5strategy_empirical_comparison.json"
++    out_file = WORKSPACE_ROOT / "reports" / "trial-20261019" / "5strategy_empirical_comparison.json"
++    out_file.parent.mkdir(parents=True, exist_ok=True)
+     with open(out_file, "w") as f:
+         json.dump(all_results, f, indent=2)
+     print(f"\n[✓] Saved 5-strategy comparative results to: {out_file}")
+diff --git a/scripts/trial-20261019/run_concurrency_stress_matrix.py b/scripts/trial-20261019/run_concurrency_stress_matrix.py
+index 807ee72..d890351 100644
+--- a/scripts/trial-20261019/run_concurrency_stress_matrix.py
++++ b/scripts/trial-20261019/run_concurrency_stress_matrix.py
+@@ -12,13 +12,17 @@ from __future__ import annotations
+ import concurrent.futures
+ from decimal import Decimal
+ import os
++import sys
+ from pathlib import Path
+ import sqlite3
+-import sys
+ import threading
+ import time
+ from typing import Dict, List, Tuple
+ 
++REPO_ROOT = Path(__file__).resolve().parent.parent.parent
++if str(REPO_ROOT) not in sys.path:
++    sys.path.insert(0, str(REPO_ROOT))
++
+ from src.brokergateway.gateway import BrokerGateway
+ from src.brokergateway.models import ExecutionFill, ExecutionOrder
+ from src.brokergateway.states import (
+diff --git a/src/brokergateway/gateway.py b/src/brokergateway/gateway.py
+index c742aaf..f5280cb 100644
+--- a/src/brokergateway/gateway.py
++++ b/src/brokergateway/gateway.py
+@@ -13,6 +13,7 @@ from __future__ import annotations
+ 
+ from decimal import Decimal
+ import sqlite3
++import threading
+ from typing import Any, Dict, List, Optional, Set
+ 
+ from src.brokergateway.models import ExecutionFill, ExecutionOrder, StateTransitionRecord, utc_now_iso
+@@ -31,11 +32,11 @@ LEGAL_TRANSITIONS: Dict[OrderState, Set[OrderState]] = {
+     OrderState.SUBMITTED: {OrderState.OPEN, OrderState.PARTIALLY_FILLED, OrderState.FILLED, OrderState.SUBMISSION_UNKNOWN, OrderState.REJECTED, OrderState.CANCELLED},
+     OrderState.SUBMISSION_UNKNOWN: {OrderState.OPEN, OrderState.PARTIALLY_FILLED, OrderState.FILLED, OrderState.REJECTED, OrderState.CANCELLED},
+     OrderState.OPEN: {OrderState.PARTIALLY_FILLED, OrderState.FILLED, OrderState.CANCEL_REQUESTED, OrderState.CANCELLED, OrderState.EXPIRED},
+-    OrderState.PARTIALLY_FILLED: {OrderState.PARTIALLY_FILLED, OrderState.FILLED, OrderState.CANCEL_REQUESTED},
++    OrderState.PARTIALLY_FILLED: {OrderState.PARTIALLY_FILLED, OrderState.FILLED, OrderState.CANCEL_REQUESTED, OrderState.CANCELLED},
+     OrderState.CANCEL_REQUESTED: {OrderState.CANCELLED, OrderState.CANCEL_UNKNOWN, OrderState.PARTIALLY_FILLED, OrderState.FILLED},
+     OrderState.CANCEL_UNKNOWN: {OrderState.OPEN, OrderState.PARTIALLY_FILLED, OrderState.FILLED, OrderState.CANCELLED},
+     OrderState.FILLED: set(),      # Terminal state
+-    OrderState.CANCELLED: set(),   # Terminal state (except late fills handled via audit reconciliation)
++    OrderState.CANCELLED: {OrderState.FILLED, OrderState.PARTIALLY_FILLED},   # Terminal state (reopened if late fills arrive via venue execution report)
+     OrderState.REJECTED: set(),    # Terminal state
+     OrderState.EXPIRED: set(),     # Terminal state
+ }
+@@ -45,10 +46,11 @@ class BrokerGateway:
+     """Production OMS Gateway managing order lifecycles and recovery."""
+ 
+     def __init__(self, db_conn: Optional[sqlite3.Connection] = None):
++        self._lock = threading.RLock()
+         self.orders: Dict[str, ExecutionOrder] = {}
+         self.idempotency_map: Dict[str, str] = {}  # idempotency_key -> order_id
+         self.processed_fill_ids: Set[str] = set()
+-        self.conn = db_conn or sqlite3.connect(":memory:")
++        self.conn = db_conn or sqlite3.connect(":memory:", check_same_thread=False)
+         self._init_db()
+ 
+     def _init_db(self) -> None:
+@@ -111,92 +113,94 @@ class BrokerGateway:
+         is_risk_approved: bool = False,
+     ) -> ExecutionOrder:
+         """Idempotently creates a new order after passing security and risk gates."""
+-        # 1. Idempotency Check
+-        if idempotency_key in self.idempotency_map:
+-            existing_id = self.idempotency_map[idempotency_key]
+-            logger.info("Idempotent replay for key %s -> order %s", idempotency_key, existing_id)
+-            return self.orders[existing_id]
+-
+-        # 2. Intercept through Security Guard
+-        intent_payload = {
+-            "order_id": order_id,
+-            "idempotency_key": idempotency_key,
+-            "strategy_id": strategy_id,
+-            "symbol": symbol,
+-            "side": side.value,
+-            "venue": venue,
+-            "is_risk_approved": is_risk_approved,
+-            "real_money": False,
+-        }
+-        OrderDispatchSafetyGuard.intercept_order_intent(intent_payload)
+-
+-        # 2b. Authoritative Exchange Tick Precision Validation
+-        if price is not None:
+-            tick_size = InstrumentTickRegistry.get_tick_size(symbol, price)
+-            if not is_valid_tick(price, tick_size):
+-                raise InvalidOrderTickError(
+-                    f"Off-tick order price rejected: order {order_id} price {price} "
+-                    f"for {symbol} is not a valid multiple of statutory tick size {tick_size}."
+-                )
+-
+-        # 3. Instantiate Order
+-        order = ExecutionOrder(
+-            order_id=order_id,
+-            idempotency_key=idempotency_key,
+-            strategy_id=strategy_id,
+-            symbol=symbol,
+-            side=side,
+-            order_type=order_type,
+-            quantity=quantity,
+-            price=price,
+-            venue=venue,
+-            state=OrderState.CREATED,
+-        )
++        with self._lock:
++            # 1. Idempotency Check
++            if idempotency_key in self.idempotency_map:
++                existing_id = self.idempotency_map[idempotency_key]
++                logger.info("Idempotent replay for key %s -> order %s", idempotency_key, existing_id)
++                return self.orders[existing_id]
++
++            # 2. Intercept through Security Guard
++            intent_payload = {
++                "order_id": order_id,
++                "idempotency_key": idempotency_key,
++                "strategy_id": strategy_id,
++                "symbol": symbol,
++                "side": side.value,
++                "venue": venue,
++                "is_risk_approved": is_risk_approved,
++                "real_money": False,
++            }
++            OrderDispatchSafetyGuard.intercept_order_intent(intent_payload)
++
++            # 2b. Authoritative Exchange Tick Precision Validation
++            if price is not None:
++                tick_size = InstrumentTickRegistry.get_tick_size(symbol, price)
++                if not is_valid_tick(price, tick_size):
++                    raise InvalidOrderTickError(
++                        f"Off-tick order price rejected: order {order_id} price {price} "
++                        f"for {symbol} is not a valid multiple of statutory tick size {tick_size}."
++                    )
++
++            # 3. Instantiate Order
++            order = ExecutionOrder(
++                order_id=order_id,
++                idempotency_key=idempotency_key,
++                strategy_id=strategy_id,
++                symbol=symbol,
++                side=side,
++                order_type=order_type,
++                quantity=quantity,
++                price=price,
++                venue=venue,
++                state=OrderState.CREATED,
++            )
+ 
+-        self.orders[order_id] = order
+-        self.idempotency_map[idempotency_key] = order_id
++            self.orders[order_id] = order
++            self.idempotency_map[idempotency_key] = order_id
+ 
+-        # Persist
+-        cursor = self.conn.cursor()
+-        cursor.execute(
+-            "INSERT INTO orders VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+-            (
+-                order.order_id,
+-                order.idempotency_key,
+-                order.strategy_id,
+-                order.symbol,
+-                order.side.value,
+-                order.order_type.value,
+-                order.quantity,
+-                str(order.price) if order.price else None,
+-                order.venue,
+-                order.state.value,
+-                order.filled_quantity,
+-                order.remaining_quantity,
+-                order.created_at_utc,
+-                order.updated_at_utc,
+-            ),
+-        )
+-        self.conn.commit()
++            # Persist
++            cursor = self.conn.cursor()
++            cursor.execute(
++                "INSERT INTO orders VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
++                (
++                    order.order_id,
++                    order.idempotency_key,
++                    order.strategy_id,
++                    order.symbol,
++                    order.side.value,
++                    order.order_type.value,
++                    order.quantity,
++                    str(order.price) if order.price else None,
++                    order.venue,
++                    order.state.value,
++                    order.filled_quantity,
++                    order.remaining_quantity,
++                    order.created_at_utc,
++                    order.updated_at_utc,
++                ),
++            )
++            self.conn.commit()
+ 
+-        # Advance to RISK_RESERVED
+-        self.transition_state(order_id, OrderState.RISK_RESERVED, "Risk capital reserved")
+-        return order
++            # Advance to RISK_RESERVED
++            self.transition_state(order_id, OrderState.RISK_RESERVED, "Risk capital reserved")
++            return order
+ 
+     def transition_state(self, order_id: str, target_state: OrderState, reason: str) -> ExecutionOrder:
+         """Transitions order state according to strict legal state machine."""
+-        order = self.orders.get(order_id)
+-        if not order:
+-            raise ValueError(f"Order '{order_id}' not found.")
+-
+-        current = order.state
+-        if target_state != current:
+-            legal = LEGAL_TRANSITIONS.get(current, set())
+-            if target_state not in legal:
+-                raise ValueError(
+-                    f"Illegal order state transition for {order_id}: {current.value} -> {target_state.value}. "
+-                    f"Legal targets: {[s.value for s in legal]}"
+-                )
++        with self._lock:
++            order = self.orders.get(order_id)
++            if not order:
++                raise ValueError(f"Order '{order_id}' not found.")
++
++            current = order.state
++            if target_state != current:
++                legal = LEGAL_TRANSITIONS.get(current, set())
++                if target_state not in legal:
++                    raise ValueError(
++                        f"Illegal order state transition for {order_id}: {current.value} -> {target_state.value}. "
++                        f"Legal targets: {[s.value for s in legal]}"
++                    )
+ 
+             order.state = target_state
+             order.updated_at_utc = utc_now_iso()
+@@ -225,6 +229,18 @@ class BrokerGateway:
+             f"Network timeout during submission: {error_detail}",
+         )
+ 
++    def request_cancellation(self, order_id: str, reason: str = "Client cancellation requested") -> ExecutionOrder:
++        """Transitions order to CANCEL_REQUESTED.
++        
++        Note: Cancellation requests must not be confused with confirmed cancellations.
++        The order remains active until venue confirmation or timeout occurs.
++        """
++        return self.transition_state(order_id, OrderState.CANCEL_REQUESTED, reason)
++
++    def confirm_cancellation(self, order_id: str, reason: str = "Venue confirmed cancellation") -> ExecutionOrder:
++        """Transitions order to confirmed CANCELLED state upon authoritative venue confirmation."""
++        return self.transition_state(order_id, OrderState.CANCELLED, reason)
++
+     def handle_cancellation_timeout(self, order_id: str, error_detail: str) -> ExecutionOrder:
+         """Transitions order to CANCEL_UNKNOWN upon cancellation timeout."""
+         return self.transition_state(
+@@ -240,94 +256,96 @@ class BrokerGateway:
+         venue_evidence: Optional[Dict[str, Any]] = None,
+     ) -> ExecutionOrder:
+         """Authoritatively resolves orders in SUBMISSION_UNKNOWN or CANCEL_UNKNOWN states."""
+-        order = self.orders.get(order_id)
+-        if not order:
+-            raise ValueError(f"Order '{order_id}' not found.")
++        with self._lock:
++            order = self.orders.get(order_id)
++            if not order:
++                raise ValueError(f"Order '{order_id}' not found.")
++
++            if order.state not in (OrderState.SUBMISSION_UNKNOWN, OrderState.CANCEL_UNKNOWN):
++                logger.warning("Order %s is not in uncertain state (current: %s)", order_id, order.state.value)
++                return order
++
++            evidence = venue_evidence or {}
++            if resolution_status == UncertaintyResolutionStatus.CONFIRMED_AT_VENUE:
++                # Venue confirmed order was received
++                if order.state == OrderState.SUBMISSION_UNKNOWN:
++                    self.transition_state(order_id, OrderState.OPEN, "Confirmed active at venue via reconciliation")
++                elif order.state == OrderState.CANCEL_UNKNOWN:
++                    self.transition_state(order_id, OrderState.CANCELLED, "Confirmed cancelled at venue via reconciliation")
++            elif resolution_status == UncertaintyResolutionStatus.ABSENT_AT_VENUE:
++                # Venue confirmed order was never received
++                if order.state == OrderState.SUBMISSION_UNKNOWN:
++                    self.transition_state(order_id, OrderState.REJECTED, "Confirmed absent at venue; order rejected")
++                elif order.state == OrderState.CANCEL_UNKNOWN:
++                    if order.filled_quantity >= order.quantity and order.quantity > 0:
++                        self.transition_state(order_id, OrderState.FILLED, "Cancellation absent at venue; order already filled")
++                    elif order.filled_quantity > 0:
++                        self.transition_state(order_id, OrderState.PARTIALLY_FILLED, "Cancellation absent at venue; order remains PARTIALLY_FILLED")
++                    else:
++                        self.transition_state(order_id, OrderState.OPEN, "Cancellation absent at venue; order remains OPEN")
++            elif resolution_status == UncertaintyResolutionStatus.MANUAL_ESCALATION:
++                logger.critical("Order %s requires MANUAL OPERATOR INTERVENTION: %s", order_id, evidence)
+ 
+-        if order.state not in (OrderState.SUBMISSION_UNKNOWN, OrderState.CANCEL_UNKNOWN):
+-            logger.warning("Order %s is not in uncertain state (current: %s)", order_id, order.state.value)
+             return order
+ 
+-        evidence = venue_evidence or {}
+-        if resolution_status == UncertaintyResolutionStatus.CONFIRMED_AT_VENUE:
+-            # Venue confirmed order was received
+-            if order.state == OrderState.SUBMISSION_UNKNOWN:
+-                self.transition_state(order_id, OrderState.OPEN, "Confirmed active at venue via reconciliation")
+-            elif order.state == OrderState.CANCEL_UNKNOWN:
+-                self.transition_state(order_id, OrderState.CANCELLED, "Confirmed cancelled at venue via reconciliation")
+-        elif resolution_status == UncertaintyResolutionStatus.ABSENT_AT_VENUE:
+-            # Venue confirmed order was never received
+-            if order.state == OrderState.SUBMISSION_UNKNOWN:
+-                self.transition_state(order_id, OrderState.REJECTED, "Confirmed absent at venue; order rejected")
+-            elif order.state == OrderState.CANCEL_UNKNOWN:
+-                if order.filled_quantity >= order.quantity and order.quantity > 0:
+-                    self.transition_state(order_id, OrderState.FILLED, "Cancellation absent at venue; order already filled")
+-                elif order.filled_quantity > 0:
+-                    self.transition_state(order_id, OrderState.PARTIALLY_FILLED, "Cancellation absent at venue; order remains PARTIALLY_FILLED")
+-                else:
+-                    self.transition_state(order_id, OrderState.OPEN, "Cancellation absent at venue; order remains OPEN")
+-        elif resolution_status == UncertaintyResolutionStatus.MANUAL_ESCALATION:
+-            logger.critical("Order %s requires MANUAL OPERATOR INTERVENTION: %s", order_id, evidence)
+-
+-        return order
+-
+     def process_fill(self, fill: ExecutionFill) -> ExecutionOrder:
+         """Ingests a discrete fill event with exact deduplication and late-fill handling."""
+-        order = self.orders.get(fill.order_id)
+-        if not order:
+-            raise ValueError(f"Fill references unknown order ID: '{fill.order_id}'")
+-
+-        # 1. Fill Deduplication Check
+-        if fill.fill_id in self.processed_fill_ids:
+-            logger.warning("DUPLICATE FILL IGNORED: fill_id %s already processed for order %s", fill.fill_id, fill.order_id)
+-            return order
+-
+-        self.processed_fill_ids.add(fill.fill_id)
+-
+-        # 2. Check Late Fill
+-        is_late_fill = order.state in (OrderState.CANCEL_REQUESTED, OrderState.CANCEL_UNKNOWN, OrderState.CANCELLED)
+-        if is_late_fill:
+-            logger.warning("LATE FILL RECEIVED for order %s in state %s: fill_id %s, qty %d", order.order_id, order.state.value, fill.fill_id, fill.quantity)
++        with self._lock:
++            order = self.orders.get(fill.order_id)
++            if not order:
++                raise ValueError(f"Fill references unknown order ID: '{fill.order_id}'")
++
++            # 1. Fill Deduplication Check
++            if fill.fill_id in self.processed_fill_ids:
++                logger.warning("DUPLICATE FILL IGNORED: fill_id %s already processed for order %s", fill.fill_id, fill.order_id)
++                return order
++
++            self.processed_fill_ids.add(fill.fill_id)
++
++            # 2. Check Late Fill
++            is_late_fill = order.state in (OrderState.CANCEL_REQUESTED, OrderState.CANCEL_UNKNOWN, OrderState.CANCELLED)
++            if is_late_fill:
++                logger.warning("LATE FILL RECEIVED for order %s in state %s: fill_id %s, qty %d", order.order_id, order.state.value, fill.fill_id, fill.quantity)
++
++            # 3. Update Order Quantities and Average Price
++            new_filled = order.filled_quantity + fill.quantity
++            if new_filled > order.quantity:
++                raise ValueError(
++                    f"Fill overfills order {order.order_id}: existing filled {order.filled_quantity} + "
++                    f"fill qty {fill.quantity} > total order qty {order.quantity}"
++                )
+ 
+-        # 3. Update Order Quantities and Average Price
+-        new_filled = order.filled_quantity + fill.quantity
+-        if new_filled > order.quantity:
+-            raise ValueError(
+-                f"Fill overfills order {order.order_id}: existing filled {order.filled_quantity} + "
+-                f"fill qty {fill.quantity} > total order qty {order.quantity}"
++            # Weighted average calculation
++            total_value = (order.average_fill_price * Decimal(order.filled_quantity)) + (fill.price * Decimal(fill.quantity))
++            order.filled_quantity = new_filled
++            order.remaining_quantity = order.quantity - new_filled
++            order.average_fill_price = total_value / Decimal(order.filled_quantity)
++            order.fills.append(fill)
++
++            # 4. State Transition
++            if order.filled_quantity == order.quantity:
++                if order.state != OrderState.FILLED:
++                    self.transition_state(order.order_id, OrderState.FILLED, f"Filled completely by fill {fill.fill_id}")
++            else:
++                if order.state in (OrderState.OPEN, OrderState.SUBMITTED, OrderState.SUBMISSION_UNKNOWN, OrderState.CANCEL_UNKNOWN, OrderState.CANCEL_REQUESTED):
++                    self.transition_state(order.order_id, OrderState.PARTIALLY_FILLED, f"Partially filled by fill {fill.fill_id}")
++
++            # Persist fill
++            cursor = self.conn.cursor()
++            cursor.execute(
++                "INSERT INTO fills VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
++                (
++                    fill.fill_id,
++                    fill.order_id,
++                    fill.symbol,
++                    fill.side.value,
++                    fill.quantity,
++                    str(fill.price),
++                    str(fill.transaction_cost),
++                    str(fill.slippage_cost),
++                    fill.timestamp_utc,
++                ),
+             )
++            self.conn.commit()
+ 
+-        # Weighted average calculation
+-        total_value = (order.average_fill_price * Decimal(order.filled_quantity)) + (fill.price * Decimal(fill.quantity))
+-        order.filled_quantity = new_filled
+-        order.remaining_quantity = order.quantity - new_filled
+-        order.average_fill_price = total_value / Decimal(order.filled_quantity)
+-        order.fills.append(fill)
+-
+-        # 4. State Transition
+-        if order.filled_quantity == order.quantity:
+-            if order.state != OrderState.FILLED:
+-                self.transition_state(order.order_id, OrderState.FILLED, f"Filled completely by fill {fill.fill_id}")
+-        else:
+-            if order.state in (OrderState.OPEN, OrderState.SUBMITTED, OrderState.SUBMISSION_UNKNOWN, OrderState.CANCEL_UNKNOWN):
+-                self.transition_state(order.order_id, OrderState.PARTIALLY_FILLED, f"Partially filled by fill {fill.fill_id}")
+-
+-        # Persist fill
+-        cursor = self.conn.cursor()
+-        cursor.execute(
+-            "INSERT INTO fills VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+-            (
+-                fill.fill_id,
+-                fill.order_id,
+-                fill.symbol,
+-                fill.side.value,
+-                fill.quantity,
+-                str(fill.price),
+-                str(fill.transaction_cost),
+-                str(fill.slippage_cost),
+-                fill.timestamp_utc,
+-            ),
+-        )
+-        self.conn.commit()
+-
+-        return order
++            return order
+diff --git a/src/capitalreservation/service.py b/src/capitalreservation/service.py
+index fe53721..df7e8a3 100644
+--- a/src/capitalreservation/service.py
++++ b/src/capitalreservation/service.py
+@@ -202,3 +202,51 @@ class CapitalReservationService:
+         else:
+             cursor.execute("ROLLBACK")
+             return ReservationOutcome.IDEMPOTENT_REPLAY
++
++    def consume_partial(self, reservation_id: str, filled_notional: Decimal) -> Dict[str, Any]:
++        """Atomically consumes the exact filled portion of a reservation and releases the remainder.
++
++        Prevents margin lockup on partial fills while ensuring exact financial reconciliation.
++        """
++        cursor = self.conn.cursor()
++        cursor.execute("BEGIN EXCLUSIVE")
++        cursor.execute(
++            "SELECT reserved_cash, status FROM capital_reservations WHERE reservation_id = ?",
++            (reservation_id,),
++        )
++        row = cursor.fetchone()
++        if not row:
++            cursor.execute("ROLLBACK")
++            return {"outcome": ReservationOutcome.NOT_FOUND}
++
++        original_reserved = Decimal(str(row[0]))
++        current_status = ReservationStatus(row[1])
++
++        if current_status != ReservationStatus.ACTIVE:
++            cursor.execute("ROLLBACK")
++            return {
++                "outcome": ReservationOutcome.IDEMPOTENT_REPLAY,
++                "status": current_status,
++                "consumed_cash": original_reserved,
++                "released_cash": Decimal("0.0"),
++            }
++
++        consumed_cash = min(filled_notional, original_reserved)
++        released_cash = max(Decimal("0.0"), original_reserved - consumed_cash)
++        now_utc = utc_now_iso()
++
++        cursor.execute(
++            "UPDATE capital_reservations SET reserved_cash = ?, status = ?, updated_at = ? WHERE reservation_id = ?",
++            (str(consumed_cash), ReservationStatus.CONSUMED.value, now_utc, reservation_id),
++        )
++        self.conn.commit()
++        logger.info(
++            "Reservation %s PARTIALLY CONSUMED: %s consumed, %s released back to cash",
++            reservation_id, consumed_cash, released_cash,
++        )
++        return {
++            "outcome": ReservationOutcome.CONSUMED,
++            "reservation_id": reservation_id,
++            "consumed_cash": consumed_cash,
++            "released_cash": released_cash,
++        }
+diff --git a/src/simulation/engine.py b/src/simulation/engine.py
+index 3ade5dd..27e1476 100644
+--- a/src/simulation/engine.py
++++ b/src/simulation/engine.py
+@@ -142,8 +142,14 @@ class HistoricalReplayEngine:
+                     sl_res = self.fill_model.evaluate_stop_loss_exit(symbol, pos["side"], pos["stop_loss"], bar, tick_size)
+                     tp_res = self.fill_model.evaluate_take_profit_exit(symbol, pos["side"], pos["take_profit"], bar, tick_size)
+ 
+-                    # Conservative collision check: if bar touches both SL and TP, SL is triggered
+-                    if sl_res:
++                    # Gap opening priority & conservative collision check:
++                    # 1. If bar opened beyond take-profit, the exit occurred on open before subsequent intraday action
++                    if pos["side"] == OrderSide.BUY and bar.open >= pos["take_profit"]:
++                        exit_price, exit_reason = tp_res or (bar.open, "TAKE_PROFIT_GAP_THROUGH")
++                    elif pos["side"] == OrderSide.SELL and bar.open <= pos["take_profit"]:
++                        exit_price, exit_reason = tp_res or (bar.open, "TAKE_PROFIT_GAP_THROUGH")
++                    # 2. Conservative collision check: if bar touches both SL and TP during intraday range, SL is triggered
++                    elif sl_res:
+                         exit_price, exit_reason = sl_res
+                     elif tp_res:
+                         exit_price, exit_reason = tp_res
+@@ -295,49 +301,50 @@ class HistoricalReplayEngine:
+                                 session_date = bar.timestamp_iso[:10]
+                                 self.strategy.mark_order_filled(session_date)
+ 
+-                                if fill_res.is_partial_fill:
+-                                    self.partial_fills += 1
+-
+-                                filled_qty = fill_res.filled_quantity
+-                                fill_price = fill_res.fill_price
+-                                entry_friction = fill_res.friction
+-
+-                                fill = ExecutionFill(
+-                                    fill_id=fill_res.fill_id,
+-                                    order_id=order_id,
+-                                    symbol=symbol,
+-                                    side=signal.side,
+-                                    quantity=filled_qty,
+-                                    price=fill_price,
+-                                    transaction_cost=entry_friction.total_transaction_cost,
+-                                    slippage_cost=entry_friction.slippage,
+-                                )
+-                                self.gateway.process_fill(fill)
+-
+-                                if fill_res.is_partial_fill:
+-                                    self.gateway.transition_state(order_id, OrderState.CANCELLED, f"Cancelled remaining unfilled {fill_res.unfilled_quantity} shares")
+-
+-                                actual_notional = Decimal(str(filled_qty)) * fill_price
+-                                if signal.side == OrderSide.BUY:
+-                                    self.cash -= (actual_notional + entry_friction.total_transaction_cost + entry_friction.slippage)
+-                                else:
+-                                    self.cash += (actual_notional - entry_friction.total_transaction_cost - entry_friction.slippage)
+-                                total_fees += entry_friction.total_transaction_cost
+-                                total_slippage += entry_friction.slippage
+-
+-                                open_positions[symbol] = {
+-                                    "order_id": order_id,
+-                                    "reservation_id": res["reservation_id"],
+-                                    "side": signal.side,
+-                                    "quantity": filled_qty,
+-                                    "entry_price": fill_price,
+-                                    "entry_friction": entry_friction,
+-                                    "stop_loss": signal.stop_loss,
+-                                    "take_profit": signal.take_profit,
+-                                    "entry_time": ts,
+-                                }
++                            if fill_res.is_partial_fill:
++                                self.partial_fills += 1
++
++                            filled_qty = fill_res.filled_quantity
++                            fill_price = fill_res.fill_price
++                            entry_friction = fill_res.friction
++
++                            fill = ExecutionFill(
++                                fill_id=fill_res.fill_id,
++                                order_id=order_id,
++                                symbol=symbol,
++                                side=signal.side,
++                                quantity=filled_qty,
++                                price=fill_price,
++                                transaction_cost=entry_friction.total_transaction_cost,
++                                slippage_cost=entry_friction.slippage,
++                            )
++                            self.gateway.process_fill(fill)
++
++                            actual_notional = Decimal(str(filled_qty)) * fill_price
++                            if fill_res.is_partial_fill:
++                                self.gateway.transition_state(order_id, OrderState.CANCELLED, f"Cancelled remaining unfilled {fill_res.unfilled_quantity} shares")
++                                self.reservation_service.consume_partial(res["reservation_id"], actual_notional)
++
++                            if signal.side == OrderSide.BUY:
++                                self.cash -= (actual_notional + entry_friction.total_transaction_cost + entry_friction.slippage)
+                             else:
+-                                self.rejected_signals += 1
++                                self.cash += (actual_notional - entry_friction.total_transaction_cost - entry_friction.slippage)
++                            total_fees += entry_friction.total_transaction_cost
++                            total_slippage += entry_friction.slippage
++
++                            open_positions[symbol] = {
++                                "order_id": order_id,
++                                "reservation_id": res["reservation_id"],
++                                "side": signal.side,
++                                "quantity": filled_qty,
++                                "entry_price": fill_price,
++                                "entry_friction": entry_friction,
++                                "stop_loss": signal.stop_loss,
++                                "take_profit": signal.take_profit,
++                                "entry_time": ts,
++                            }
++                        else:
++                            self.rejected_signals += 1
+ 
+                 symbol_history[symbol].append(bar)
+ 

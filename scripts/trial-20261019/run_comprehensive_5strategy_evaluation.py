@@ -29,7 +29,7 @@ import numpy as np
 import pandas as pd
 import yfinance as yf
 
-WORKSPACE_ROOT = Path(__file__).resolve().parent.parent / "algo-lab-unified-trial"
+WORKSPACE_ROOT = Path(__file__).resolve().parent.parent.parent
 sys.path.insert(0, str(WORKSPACE_ROOT))
 
 from src.core.safety_invariants import assert_paper_only_invariants
@@ -361,7 +361,8 @@ def run_5strategy_backtest() -> Dict[str, Any]:
         print(f"{strat:<25} | {m['total_trades']:>6d} | {m['win_rate_pct']:>5.1f}% | ₹{m['gross_pnl_inr']:>10,.2f} | ₹{m['total_friction_inr']:>9,.2f} | ₹{m['net_pnl_inr']:>10,.2f} | {m['profit_factor']:>5.2f} | ₹{m['expectancy_inr']:>7.2f} | {m['max_drawdown_pct']:>7.2f}%")
     print("=" * 115)
 
-    out_file = Path(__file__).resolve().parent.parent / "reports" / "5strategy_empirical_comparison.json"
+    out_file = WORKSPACE_ROOT / "reports" / "trial-20261019" / "5strategy_empirical_comparison.json"
+    out_file.parent.mkdir(parents=True, exist_ok=True)
     with open(out_file, "w") as f:
         json.dump(all_results, f, indent=2)
     print(f"\n[✓] Saved 5-strategy comparative results to: {out_file}")

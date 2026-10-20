@@ -202,3 +202,51 @@ class CapitalReservationService:
         else:
             cursor.execute("ROLLBACK")
             return ReservationOutcome.IDEMPOTENT_REPLAY
+
+    def consume_partial(self, reservation_id: str, filled_notional: Decimal) -> Dict[str, Any]:
+        """Atomically consumes the exact filled portion of a reservation and releases the remainder.
+
+        Prevents margin lockup on partial fills while ensuring exact financial reconciliation.
+        """
+        cursor = self.conn.cursor()
+        cursor.execute("BEGIN EXCLUSIVE")
+        cursor.execute(
+            "SELECT reserved_cash, status FROM capital_reservations WHERE reservation_id = ?",
+            (reservation_id,),
+        )
+        row = cursor.fetchone()
+        if not row:
+            cursor.execute("ROLLBACK")
+            return {"outcome": ReservationOutcome.NOT_FOUND}
+
+        original_reserved = Decimal(str(row[0]))
+        current_status = ReservationStatus(row[1])
+
+        if current_status != ReservationStatus.ACTIVE:
+            cursor.execute("ROLLBACK")
+            return {
+                "outcome": ReservationOutcome.IDEMPOTENT_REPLAY,
+                "status": current_status,
+                "consumed_cash": original_reserved,
+                "released_cash": Decimal("0.0"),
+            }
+
+        consumed_cash = min(filled_notional, original_reserved)
+        released_cash = max(Decimal("0.0"), original_reserved - consumed_cash)
+        now_utc = utc_now_iso()
+
+        cursor.execute(
+            "UPDATE capital_reservations SET reserved_cash = ?, status = ?, updated_at = ? WHERE reservation_id = ?",
+            (str(consumed_cash), ReservationStatus.CONSUMED.value, now_utc, reservation_id),
+        )
+        self.conn.commit()
+        logger.info(
+            "Reservation %s PARTIALLY CONSUMED: %s consumed, %s released back to cash",
+            reservation_id, consumed_cash, released_cash,
+        )
+        return {
+            "outcome": ReservationOutcome.CONSUMED,
+            "reservation_id": reservation_id,
+            "consumed_cash": consumed_cash,
+            "released_cash": released_cash,
+        }

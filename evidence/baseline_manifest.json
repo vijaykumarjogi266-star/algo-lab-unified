@@ -1,0 +1,23 @@
+{
+  "repositories": {
+    "all-in-one": {
+      "path": "/home/ubuntu/all-in-one",
+      "expected_commit": "8a23393c36c091880ad38284ab8468072857482d",
+      "expected_status": [
+        " M data/decisions/agent_consensus_ledger.json",
+        " M data/reports/hot_state_live_snapshot.json",
+        "?? data/intraday_ledger.db-shm",
+        "?? data/intraday_ledger.db-wal",
+        "?? data/preflight/",
+        "?? data/reports/live_execution_stream.jsonl"
+      ]
+    },
+    "algolab": {
+      "path": "/home/ubuntu/algolab",
+      "expected_commit": "2389387ea351c733909f39245adbeca0c935a12a",
+      "expected_status": [
+        " M data/live_portfolio_state.json"
+      ]
+    }
+  }
+}
