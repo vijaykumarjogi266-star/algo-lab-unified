@@ -6,7 +6,7 @@
 **Target Repository:** [`https://github.com/vijaykumarjogi266-star/algo-lab-unified`](https://github.com/vijaykumarjogi266-star/algo-lab-unified)  
 **Authoritative Isolated Worktree:** [`/home/ubuntu/worktrees/remediation-mission-001/`](file:///home/ubuntu/worktrees/remediation-mission-001/)  
 **Dedicated Branch:** `remediation/mission-001-ledger-recovery`  
-**Isolated Commit SHA:** `c3ebbc9d4d7c94b1f27ab17c02f30a1a2831523b`  
+**Isolated Commit SHA:** `5eec0f1eaa96aa5585502a19d8c0366b4328a443` (Code remediation commit: `c3ebbc9d4d7c94b1f27ab17c02f30a1a2831523b`)  
 **Base Commit SHA:** `f24dfb128c7068560fa3923c72b83ff56d4ba4c8`  
 **Original Branch Status:** `integration/strategy-reuse-and-unification-20261019` (Untouched, Clean)  
 **Release Posture:** **`STRICT HOLD — Not merged. Human approval required.`**
@@ -125,5 +125,5 @@ tests/unit/test_tick_precision.py .................................       [100%]
 
 > [!IMPORTANT]
 > **EXPLICIT HUMAN APPROVAL REQUIRED**  
-> All remediations are committed strictly within isolated branch `remediation/mission-001-ledger-recovery` (Commit: `c3ebbc9d4d7c94b1f27ab17c02f30a1a2831523b`).  
+> All remediations are committed strictly within isolated branch `remediation/mission-001-ledger-recovery` (Commit: `5eec0f1eaa96aa5585502a19d8c0366b4328a443`).  
 > **Status: Not merged. Promotion to main is blocked awaiting human authorization.**
