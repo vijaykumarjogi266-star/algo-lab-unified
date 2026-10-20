@@ -226,7 +226,8 @@ class HistoricalReplayEngine:
                         # Release capital reservation
                         self.reservation_service.consume_capital(pos["reservation_id"])
                         del open_positions[symbol]
-                        self.equity_curve.append(self.cash)
+                        current_portfolio_equity = self.initial_capital + gross_realized_pnl - total_fees - total_slippage
+                        self.equity_curve.append(current_portfolio_equity)
                         continue
 
                 # Strategy evaluation if no position open
@@ -348,6 +349,17 @@ class HistoricalReplayEngine:
 
                 symbol_history[symbol].append(bar)
 
+            # Mark-to-market portfolio equity including unrealized P&L
+            unrealized_pnl = Decimal("0.0")
+            for pos_sym, pos_val in open_positions.items():
+                curr_price = bar.close if pos_sym == symbol else (symbol_history[pos_sym][-1].close if symbol_history[pos_sym] else pos_val["entry_price"])
+                if pos_val["side"] == OrderSide.BUY:
+                    unrealized_pnl += (curr_price - pos_val["entry_price"]) * Decimal(str(pos_val["quantity"]))
+                else:
+                    unrealized_pnl += (pos_val["entry_price"] - curr_price) * Decimal(str(pos_val["quantity"]))
+            current_portfolio_equity = self.initial_capital + gross_realized_pnl + unrealized_pnl - total_fees - total_slippage
+            self.equity_curve.append(current_portfolio_equity)
+
         # Force EOD square-off for remaining open positions
         for symbol, pos in list(open_positions.items()):
             last_bar = symbol_history[symbol][-1]
@@ -425,7 +437,8 @@ class HistoricalReplayEngine:
                 "reason": "EOD_SQUAREOFF",
             })
             del open_positions[symbol]
-            self.equity_curve.append(self.cash)
+            current_portfolio_equity = self.initial_capital + gross_realized_pnl - total_fees - total_slippage
+            self.equity_curve.append(current_portfolio_equity)
 
         # 4. EOD Double-Entry Reconciliation
         all_orders = list(self.gateway.orders.values())

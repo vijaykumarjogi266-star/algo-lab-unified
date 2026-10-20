@@ -24,6 +24,7 @@ ENV/
 data/*.db
 data/backups/
 data/reports/
+reports/
 data/decisions/
 data/preflight/
 

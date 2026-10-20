@@ -121,7 +121,7 @@ def main() -> int:
     }
 
     env_override = os.environ.get("BACKTEST_REPORT_PATH")
-    report_path = Path(env_override) if env_override else Path("/opt/ai-builder/workspaces/algolab-unification-20261019-083200/reports/phase-8/backtest_metrics.json")
+    report_path = Path(env_override) if env_override else (WORKSPACE_ROOT / "reports" / "backtest_metrics.json")
     report_path.parent.mkdir(parents=True, exist_ok=True)
     with open(report_path, "w") as f:
         json.dump(report_dict, f, indent=2)

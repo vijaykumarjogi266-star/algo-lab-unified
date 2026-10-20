@@ -28,6 +28,7 @@ class ReservationOutcome(str, Enum):
     RELEASED = "RELEASED"
     CONSUMED = "CONSUMED"
     NOT_FOUND = "NOT_FOUND"
+    REJECTED = "REJECTED"
 
 
 @dataclass

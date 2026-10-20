@@ -52,6 +52,7 @@ class BrokerGateway:
         self.processed_fill_ids: Set[str] = set()
         self.conn = db_conn or sqlite3.connect(":memory:", check_same_thread=False)
         self._init_db()
+        self._hydrate_from_db()
 
     def _init_db(self) -> None:
         """Initializes order persistence tables."""
@@ -99,6 +100,89 @@ class BrokerGateway:
         """)
         self.conn.commit()
 
+    def _hydrate_from_db(self) -> None:
+        """Hydrates in-memory order states, idempotency mappings, and fills from database."""
+        cursor = self.conn.cursor()
+
+        # 1. Hydrate orders
+        cursor.execute("""
+            SELECT order_id, idempotency_key, strategy_id, symbol, side, order_type,
+                   quantity, price, venue, state, filled_quantity, remaining_quantity,
+                   created_at, updated_at
+            FROM orders
+        """)
+        for row in cursor.fetchall():
+            order_id = row[0]
+            idem_key = row[1]
+            price = Decimal(str(row[7])) if row[7] is not None else None
+            order = ExecutionOrder(
+                order_id=order_id,
+                idempotency_key=idem_key,
+                strategy_id=row[2],
+                symbol=row[3],
+                side=OrderSide(row[4]),
+                order_type=OrderType(row[5]),
+                quantity=row[6],
+                price=price,
+                venue=row[8],
+                state=OrderState(row[9]),
+                filled_quantity=row[10],
+                remaining_quantity=row[11],
+                created_at_utc=row[12],
+                updated_at_utc=row[13],
+            )
+            self.orders[order_id] = order
+            self.idempotency_map[idem_key] = order_id
+
+        # 2. Hydrate fills
+        cursor.execute("""
+            SELECT fill_id, order_id, symbol, side, quantity, price,
+                   transaction_cost, slippage_cost, timestamp_utc
+            FROM fills
+        """)
+        for row in cursor.fetchall():
+            fill_id = row[0]
+            self.processed_fill_ids.add(fill_id)
+            order_id = row[1]
+            fill = ExecutionFill(
+                fill_id=fill_id,
+                order_id=order_id,
+                symbol=row[2],
+                side=OrderSide(row[3]),
+                quantity=row[4],
+                price=Decimal(str(row[5])),
+                transaction_cost=Decimal(str(row[6])),
+                slippage_cost=Decimal(str(row[7])),
+                timestamp_utc=row[8],
+            )
+            if order_id in self.orders:
+                self.orders[order_id].fills.append(fill)
+
+        # 3. Recompute average fill prices from fills
+        for order in self.orders.values():
+            if order.fills:
+                total_val = sum((f.price * Decimal(f.quantity) for f in order.fills), Decimal("0.0"))
+                total_qty = sum((f.quantity for f in order.fills), 0)
+                if total_qty > 0:
+                    order.average_fill_price = total_val / Decimal(total_qty)
+
+        # 4. Hydrate state transitions
+        cursor.execute("""
+            SELECT order_id, from_state, to_state, reason, timestamp_utc
+            FROM state_transitions ORDER BY id ASC
+        """)
+        for row in cursor.fetchall():
+            order_id = row[0]
+            if order_id in self.orders:
+                self.orders[order_id].state_history.append(
+                    StateTransitionRecord(
+                        from_state=OrderState(row[1]),
+                        to_state=OrderState(row[2]),
+                        reason=row[3],
+                        timestamp_utc=row[4],
+                    )
+                )
+
     def create_order(
         self,
         order_id: str,
@@ -113,6 +197,11 @@ class BrokerGateway:
         is_risk_approved: bool = False,
     ) -> ExecutionOrder:
         """Idempotently creates a new order after passing security and risk gates."""
+        if quantity <= 0:
+            raise ValueError(f"Invalid order quantity {quantity}: quantity must be greater than zero.")
+        if price is not None and price <= Decimal("0.0"):
+            raise ValueError(f"Invalid order price {price}: price must be greater than zero.")
+
         with self._lock:
             # 1. Idempotency Check
             if idempotency_key in self.idempotency_map:
@@ -295,19 +384,20 @@ class BrokerGateway:
             if not order:
                 raise ValueError(f"Fill references unknown order ID: '{fill.order_id}'")
 
-            # 1. Fill Deduplication Check
-            if fill.fill_id in self.processed_fill_ids:
-                logger.warning("DUPLICATE FILL IGNORED: fill_id %s already processed for order %s", fill.fill_id, fill.order_id)
-                return order
+            # 1. Fill Boundary & Semantic Validation (MUST precede deduplication registration)
+            if fill.quantity <= 0:
+                raise ValueError(f"Invalid fill quantity {fill.quantity}: must be greater than zero.")
+            if fill.price <= Decimal("0.0"):
+                raise ValueError(f"Invalid fill price {fill.price}: must be greater than zero.")
+            if fill.symbol != order.symbol:
+                raise ValueError(
+                    f"Symbol mismatch: Fill symbol '{fill.symbol}' != Order symbol '{order.symbol}'"
+                )
+            if fill.side != order.side:
+                raise ValueError(
+                    f"Side mismatch: Fill side '{fill.side}' != Order side '{order.side}'"
+                )
 
-            self.processed_fill_ids.add(fill.fill_id)
-
-            # 2. Check Late Fill
-            is_late_fill = order.state in (OrderState.CANCEL_REQUESTED, OrderState.CANCEL_UNKNOWN, OrderState.CANCELLED)
-            if is_late_fill:
-                logger.warning("LATE FILL RECEIVED for order %s in state %s: fill_id %s, qty %d", order.order_id, order.state.value, fill.fill_id, fill.quantity)
-
-            # 3. Update Order Quantities and Average Price
             new_filled = order.filled_quantity + fill.quantity
             if new_filled > order.quantity:
                 raise ValueError(
@@ -315,14 +405,26 @@ class BrokerGateway:
                     f"fill qty {fill.quantity} > total order qty {order.quantity}"
                 )
 
-            # Weighted average calculation
+            # 2. Fill Deduplication Check
+            if fill.fill_id in self.processed_fill_ids:
+                logger.warning("DUPLICATE FILL IGNORED: fill_id %s already processed for order %s", fill.fill_id, fill.order_id)
+                return order
+
+            self.processed_fill_ids.add(fill.fill_id)
+
+            # 3. Check Late Fill
+            is_late_fill = order.state in (OrderState.CANCEL_REQUESTED, OrderState.CANCEL_UNKNOWN, OrderState.CANCELLED)
+            if is_late_fill:
+                logger.warning("LATE FILL RECEIVED for order %s in state %s: fill_id %s, qty %d", order.order_id, order.state.value, fill.fill_id, fill.quantity)
+
+            # 4. Update Order Quantities and Average Price
             total_value = (order.average_fill_price * Decimal(order.filled_quantity)) + (fill.price * Decimal(fill.quantity))
             order.filled_quantity = new_filled
             order.remaining_quantity = order.quantity - new_filled
             order.average_fill_price = total_value / Decimal(order.filled_quantity)
             order.fills.append(fill)
 
-            # 4. State Transition
+            # 5. State Transition
             if order.filled_quantity == order.quantity:
                 if order.state != OrderState.FILLED:
                     self.transition_state(order.order_id, OrderState.FILLED, f"Filled completely by fill {fill.fill_id}")
@@ -330,7 +432,7 @@ class BrokerGateway:
                 if order.state in (OrderState.OPEN, OrderState.SUBMITTED, OrderState.SUBMISSION_UNKNOWN, OrderState.CANCEL_UNKNOWN, OrderState.CANCEL_REQUESTED):
                     self.transition_state(order.order_id, OrderState.PARTIALLY_FILLED, f"Partially filled by fill {fill.fill_id}")
 
-            # Persist fill
+            # 6. Persist fill and update order record in SQLite atomically
             cursor = self.conn.cursor()
             cursor.execute(
                 "INSERT INTO fills VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
@@ -344,6 +446,17 @@ class BrokerGateway:
                     str(fill.transaction_cost),
                     str(fill.slippage_cost),
                     fill.timestamp_utc,
+                ),
+            )
+            now_utc = utc_now_iso()
+            cursor.execute(
+                "UPDATE orders SET state = ?, filled_quantity = ?, remaining_quantity = ?, updated_at = ? WHERE order_id = ?",
+                (
+                    order.state.value,
+                    order.filled_quantity,
+                    order.remaining_quantity,
+                    now_utc,
+                    order.order_id,
                 ),
             )
             self.conn.commit()
