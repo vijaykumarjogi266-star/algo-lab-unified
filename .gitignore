@@ -12,6 +12,9 @@ ENV/
 
 # Configuration and Secrets
 .env
+.env*
+.zerodha_session.json
+*.bak
 .env.local
 .env.*.local
 !.env.example
@@ -22,6 +25,7 @@ ENV/
 *.sqlite
 *.sqlite3
 data/*.db
+data/backtest/
 data/backups/
 data/reports/
 reports/

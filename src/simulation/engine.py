@@ -7,6 +7,16 @@ Integrates:
 4. OMS Execution & Fill Deduplication (BrokerGateway)
 5. Statutory NSE Fees & Slippage (NSEFrictionModel)
 6. Double-Entry Balance Sheet Certification (EODReconciler)
+
+Simulation correctness guarantees (fixed defects):
+- BUG-ENGINE-003: Signals buffered to fill on the NEXT bar, eliminating same-bar
+  lookahead bias where a strategy could see bar N's close and fill within bar N's
+  high/low range.
+- BUG-RESERVATION-001: Partial-fill reservation lifecycle correctly tracks whether
+  the entry reservation was already consumed via consume_partial, preventing a
+  silent IDEMPOTENT_REPLAY on the exit consume_capital call.
+- BUG-EOD-001: EOD squareoff uses order_purpose="EXIT" (NEAREST rounding) instead
+  of the semantically wrong "ENTRY" purpose.
 """
 
 from __future__ import annotations
