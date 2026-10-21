@@ -167,6 +167,15 @@ class HistoricalReplayEngine:
                     if exit_price:
                         # Close position
                         exit_side = OrderSide.SELL if pos["side"] == OrderSide.BUY else OrderSide.BUY
+                        exit_price = quantize_order_price(
+                            exit_price,
+                            symbol,
+                            side_is_buy=(exit_side == OrderSide.BUY),
+                            order_purpose="EXIT",
+                            trade_date=ts,
+                            reference_price=bar.close,
+                            tick_size=tick_size,
+                        )
                         qty = pos["quantity"]
                         trade_gross = (exit_price - pos["entry_price"]) * Decimal(str(qty)) if pos["side"] == OrderSide.BUY else (pos["entry_price"] - exit_price) * Decimal(str(qty))
 
@@ -254,14 +263,23 @@ class HistoricalReplayEngine:
                         signal = self.strategy.evaluate(bar, symbol_history[symbol])
 
                     if signal:
+                        entry_price = quantize_order_price(
+                            signal.target_entry_price,
+                            symbol,
+                            side_is_buy=(signal.side == OrderSide.BUY),
+                            order_purpose="ENTRY",
+                            trade_date=ts,
+                            reference_price=bar.close,
+                            tick_size=tick_size,
+                        )
                         # Position sizing: risk 2% of cash, but cap total notional at 20% of available cash
                         risk_amount = self.cash * self.max_risk_per_trade_pct
-                        risk_per_share = abs(signal.target_entry_price - signal.stop_loss)
+                        risk_per_share = abs(entry_price - signal.stop_loss)
                         raw_qty = int(risk_amount / risk_per_share) if risk_per_share > Decimal("0.0") else 0
-                        max_capital_qty = int((self.cash * Decimal("0.20")) / signal.target_entry_price)
+                        max_capital_qty = int((self.cash * Decimal("0.20")) / entry_price)
                         qty = max(1, min(raw_qty, max_capital_qty))
 
-                        notional = Decimal(str(qty)) * signal.target_entry_price
+                        notional = Decimal(str(qty)) * entry_price
                         # Reserve capital atomically
                         res = self.reservation_service.reserve_capital(
                             reservation_id=f"RES-{uuid.uuid4().hex[:8]}",
@@ -270,7 +288,7 @@ class HistoricalReplayEngine:
                             strategy_id=signal.strategy_id,
                             symbol=symbol,
                             quantity=qty,
-                            price=signal.target_entry_price,
+                            price=entry_price,
                             get_available_capital=lambda acc: self.cash,
                         )
 
@@ -285,7 +303,7 @@ class HistoricalReplayEngine:
                                 side=signal.side,
                                 order_type=OrderType.LIMIT,
                                 quantity=qty,
-                                price=signal.target_entry_price,
+                                price=entry_price,
                                 venue="PAPER",
                                 is_risk_approved=True,
                                 trade_date=ts,
@@ -298,7 +316,7 @@ class HistoricalReplayEngine:
                                 symbol=symbol,
                                 side=signal.side,
                                 quantity=qty,
-                                limit_price=signal.target_entry_price,
+                                limit_price=entry_price,
                                 bar=bar,
                                 tick_size=tick_size,
                             )
