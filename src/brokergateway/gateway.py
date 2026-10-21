@@ -21,7 +21,7 @@ from src.brokergateway.safety_guard import OrderDispatchSafetyGuard
 from src.brokergateway.states import OrderSide, OrderState, OrderType, UncertaintyResolutionStatus
 from src.core.exceptions import AlgoLabSecurityError, BrokerExecutionBlockedError, IdempotencyConflictError, InvalidOrderTickError
 from src.core.logging import get_logger
-from src.core.tick_precision import InstrumentTickRegistry, is_valid_tick
+from src.core.tick_precision import HistoricalSecurityTickMaster, InstrumentTickRegistry, is_valid_tick
 
 logger = get_logger(__name__)
 
@@ -195,6 +195,7 @@ class BrokerGateway:
         price: Optional[Decimal] = None,
         venue: str = "PAPER",
         is_risk_approved: bool = False,
+        trade_date: Optional[str] = None,
     ) -> ExecutionOrder:
         """Idempotently creates a new order after passing security and risk gates."""
         if quantity <= 0:
@@ -249,7 +250,12 @@ class BrokerGateway:
 
             # 2b. Authoritative Exchange Tick Precision Validation
             if price is not None:
-                tick_size = InstrumentTickRegistry.get_tick_size(symbol, price)
+                if trade_date is not None:
+                    tick_size = HistoricalSecurityTickMaster.get_tick_metadata(
+                        symbol, trade_date=trade_date, reference_price=price
+                    ).tick_size
+                else:
+                    tick_size = InstrumentTickRegistry.get_tick_size(symbol, price)
                 if not is_valid_tick(price, tick_size):
                     raise InvalidOrderTickError(
                         f"Off-tick order price rejected: order {order_id} price {price} "

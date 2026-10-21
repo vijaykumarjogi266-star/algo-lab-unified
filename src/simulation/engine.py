@@ -192,6 +192,7 @@ class HistoricalReplayEngine:
                             price=exit_price,
                             venue="PAPER",
                             is_risk_approved=True,
+                            trade_date=ts,
                         )
                         self.gateway.transition_state(exit_order_id, OrderState.SUBMITTED, "Dispatched exit order to venue")
                         exit_fill = ExecutionFill(
@@ -287,6 +288,7 @@ class HistoricalReplayEngine:
                                 price=signal.target_entry_price,
                                 venue="PAPER",
                                 is_risk_approved=True,
+                                trade_date=ts,
                             )
                             self.gateway.transition_state(order_id, OrderState.SUBMITTED, "Dispatched to paper execution simulator")
 
@@ -406,6 +408,7 @@ class HistoricalReplayEngine:
                 price=exit_price,
                 venue="PAPER",
                 is_risk_approved=True,
+                trade_date=last_bar.timestamp_iso,
             )
             self.gateway.transition_state(exit_order_id, OrderState.SUBMITTED, "Dispatched EOD exit order")
             exit_fill = ExecutionFill(
