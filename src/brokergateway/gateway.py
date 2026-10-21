@@ -19,7 +19,7 @@ from typing import Any, Dict, List, Optional, Set
 from src.brokergateway.models import ExecutionFill, ExecutionOrder, StateTransitionRecord, utc_now_iso
 from src.brokergateway.safety_guard import OrderDispatchSafetyGuard
 from src.brokergateway.states import OrderSide, OrderState, OrderType, UncertaintyResolutionStatus
-from src.core.exceptions import AlgoLabSecurityError, BrokerExecutionBlockedError, InvalidOrderTickError
+from src.core.exceptions import AlgoLabSecurityError, BrokerExecutionBlockedError, IdempotencyConflictError, InvalidOrderTickError
 from src.core.logging import get_logger
 from src.core.tick_precision import InstrumentTickRegistry, is_valid_tick
 
@@ -206,8 +206,33 @@ class BrokerGateway:
             # 1. Idempotency Check
             if idempotency_key in self.idempotency_map:
                 existing_id = self.idempotency_map[idempotency_key]
+                existing_order = self.orders[existing_id]
+
+                # Strict payload match: a reused key with different parameters is a conflict error,
+                # not a silent idempotent replay. Silent replay of a different order would drop
+                # the second order without any notification to the caller.
+                if (
+                    existing_order.symbol != symbol
+                    or existing_order.side != side
+                    or existing_order.order_type != order_type
+                    or existing_order.quantity != quantity
+                    or existing_order.price != price
+                    or existing_order.strategy_id != strategy_id
+                    or getattr(existing_order, "venue", venue) != venue
+                ):
+                    raise IdempotencyConflictError(
+                        f"Idempotency conflict for key '{idempotency_key}': "
+                        f"existing order {existing_id} with payload "
+                        f"(strategy={existing_order.strategy_id}, symbol={existing_order.symbol}, "
+                        f"side={existing_order.side}, qty={existing_order.quantity}, "
+                        f"price={existing_order.price}, type={existing_order.order_type}, venue={existing_order.venue}) "
+                        f"conflicts with requested payload "
+                        f"(strategy={strategy_id}, symbol={symbol}, side={side}, "
+                        f"qty={quantity}, price={price}, type={order_type}, venue={venue})."
+                    )
+
                 logger.info("Idempotent replay for key %s -> order %s", idempotency_key, existing_id)
-                return self.orders[existing_id]
+                return existing_order
 
             # 2. Intercept through Security Guard
             intent_payload = {
@@ -319,12 +344,20 @@ class BrokerGateway:
         )
 
     def request_cancellation(self, order_id: str, reason: str = "Client cancellation requested") -> ExecutionOrder:
-        """Transitions order to CANCEL_REQUESTED.
-        
+        """Transitions order to CANCEL_REQUESTED after passing cancellation safety guard.
+
         Note: Cancellation requests must not be confused with confirmed cancellations.
         The order remains active until venue confirmation or timeout occurs.
         """
-        return self.transition_state(order_id, OrderState.CANCEL_REQUESTED, reason)
+        with self._lock:
+            order = self.orders.get(order_id)
+            if not order:
+                raise ValueError(f"Order '{order_id}' not found.")
+
+            # Intercept cancellation through safety guard before mutating state
+            OrderDispatchSafetyGuard.intercept_order_cancellation(order.order_id, order.venue)
+
+            return self.transition_state(order_id, OrderState.CANCEL_REQUESTED, reason)
 
     def confirm_cancellation(self, order_id: str, reason: str = "Venue confirmed cancellation") -> ExecutionOrder:
         """Transitions order to confirmed CANCELLED state upon authoritative venue confirmation."""
@@ -398,6 +431,17 @@ class BrokerGateway:
                     f"Side mismatch: Fill side '{fill.side}' != Order side '{order.side}'"
                 )
 
+            # 2. Fill Deduplication Check (MUST be evaluated BEFORE overfill check so that a
+            # duplicate fill arriving for a fully-filled order is silently ignored rather than
+            # raising a spurious ValueError.)
+            if fill.fill_id in self.processed_fill_ids:
+                logger.warning("DUPLICATE FILL IGNORED: fill_id %s already processed for order %s", fill.fill_id, fill.order_id)
+                return order
+
+            # 3a. Overfill Validation (Only evaluated for non-duplicate fills)
+            # NOTE: processed_fill_ids is NOT updated until after all validation passes, so that
+            # a rejected overfill attempt does not consume the fill_id slot, allowing a corrected
+            # retry with the same fill_id to succeed.
             new_filled = order.filled_quantity + fill.quantity
             if new_filled > order.quantity:
                 raise ValueError(
@@ -405,11 +449,7 @@ class BrokerGateway:
                     f"fill qty {fill.quantity} > total order qty {order.quantity}"
                 )
 
-            # 2. Fill Deduplication Check
-            if fill.fill_id in self.processed_fill_ids:
-                logger.warning("DUPLICATE FILL IGNORED: fill_id %s already processed for order %s", fill.fill_id, fill.order_id)
-                return order
-
+            # Registration: mark fill_id as processed ONLY after all validations pass
             self.processed_fill_ids.add(fill.fill_id)
 
             # 3. Check Late Fill

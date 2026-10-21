@@ -48,6 +48,11 @@ class InvalidStrategyParameterError(AlgoLabSecurityError):
     pass
 
 
+class IdempotencyConflictError(AlgoLabSecurityError):
+    """Raised when an idempotency key is reused with conflicting order or transaction parameters."""
+    pass
+
+
 class UnknownStrategyError(AlgoLabSecurityError):
     """Raised when an unregistered or unverified strategy identifier is requested."""
     pass
