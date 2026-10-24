@@ -3,6 +3,7 @@
 Exports canonical strategy models, base interfaces, and the central StrategyRegistry.
 """
 
+from src.strategies.adaptive_router import AdaptiveStrategyRouter
 from src.strategies.base import BaseStrategy
 from src.strategies.bollinger_reversion import BollingerReversionStrategy
 from src.strategies.donchian_breakout import DonchianBreakoutStrategy
@@ -85,6 +86,11 @@ StrategyRegistry.register(
     aliases=["OMS_HYBRID_ALPHA", "HYBRID_ALPHA"],
     description="OMS Blueprint: Volatility-based regime switching hybrid alpha.",
 )
+StrategyRegistry.register(
+    AdaptiveStrategyRouter,
+    aliases=["ADAPTIVE_ROUTER", "STRAT_ADAPTIVE_ROUTER", "MULTI_REGIME_ROUTER"],
+    description="Adaptive Multi-Regime Strategy Router with Anti-Ruin Sizing and Snooze Guard.",
+)
 
 __all__ = [
     "BaseStrategy",
@@ -108,4 +114,5 @@ __all__ = [
     "OMSMeanReversionStrategy",
     "OMSTrendFollowingStrategy",
     "OMSHybridAlphaStrategy",
+    "AdaptiveStrategyRouter",
 ]

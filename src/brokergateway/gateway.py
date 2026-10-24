@@ -242,6 +242,7 @@ class BrokerGateway:
                 "strategy_id": strategy_id,
                 "symbol": symbol,
                 "side": side.value,
+                "quantity": quantity,
                 "venue": venue,
                 "is_risk_approved": is_risk_approved,
                 "real_money": False,

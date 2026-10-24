@@ -44,6 +44,12 @@ class OrderDispatchSafetyGuard:
                 "CRITICAL: Order intent marked with real_money=True or is_live=True."
             )
 
+        # 5. Independent Quantity Validation (AUDIT-SIZING-001)
+        if "quantity" in order_intent:
+            quantity = order_intent["quantity"]
+            if not isinstance(quantity, int) or isinstance(quantity, bool) or quantity <= 0:
+                raise ValueError(f"Invalid order quantity {quantity}: Quantity must be a strictly positive integer")
+
         return order_intent
 
     @classmethod

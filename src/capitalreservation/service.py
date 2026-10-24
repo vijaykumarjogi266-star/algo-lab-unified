@@ -36,6 +36,7 @@ class CapitalReservationService:
                 idempotency_key TEXT,
                 strategy_id TEXT,
                 symbol TEXT,
+                side TEXT,
                 requested_notional TEXT,
                 reserved_cash TEXT,
                 status TEXT,
@@ -44,7 +45,22 @@ class CapitalReservationService:
                 UNIQUE(account_id, idempotency_key)
             )
         """)
+        # Runtime check for existing schema to ensure 'side' column is added if missing (DEF-F02)
+        cursor.execute("PRAGMA table_info(capital_reservations)")
+        columns = [row[1] for row in cursor.fetchall()]
+        if "side" not in columns:
+            cursor.execute("ALTER TABLE capital_reservations ADD COLUMN side TEXT")
         self.conn.commit()
+
+    def get_total_reserved_for_account(self, account_id: str) -> Decimal:
+        """Returns total active reserved capital for an account as exact Decimal (DEF-014)."""
+        cursor = self.conn.cursor()
+        cursor.execute(
+            "SELECT reserved_cash FROM capital_reservations WHERE account_id = ? AND status = ?",
+            (account_id, ReservationStatus.ACTIVE.value),
+        )
+        rows = cursor.fetchall()
+        return sum((Decimal(str(r[0])) for r in rows if r[0] is not None), Decimal("0.0"))
 
     def reserve_capital(
         self,
@@ -56,6 +72,7 @@ class CapitalReservationService:
         quantity: int,
         price: Decimal,
         get_available_capital: Callable[[str], Decimal],
+        side: Optional[str] = None,
     ) -> Dict[str, Any]:
         """Reserves capital atomically using SQLite BEGIN EXCLUSIVE transaction."""
         if quantity <= 0:
@@ -107,11 +124,14 @@ class CapitalReservationService:
                 # 2. Check Available Capital
                 base_capital = get_available_capital(account_id)
                 cursor.execute(
-                    "SELECT COALESCE(SUM(CAST(reserved_cash AS REAL)), 0.0) FROM capital_reservations WHERE account_id = ? AND status = ?",
+                    "SELECT reserved_cash FROM capital_reservations WHERE account_id = ? AND status = ?",
                     (account_id, ReservationStatus.ACTIVE.value),
                 )
-                active_sum_row = cursor.fetchone()
-                active_reserved = Decimal(str(active_sum_row[0])) if active_sum_row else Decimal("0.0")
+                rows = cursor.fetchall()
+                active_reserved = sum(
+                    (Decimal(str(r[0])) for r in rows if r[0] is not None),
+                    Decimal("0.0"),
+                )
                 available_capital = base_capital - active_reserved
 
                 if requested_notional > available_capital:
@@ -129,13 +149,19 @@ class CapitalReservationService:
                 # 3. Create Reservation
                 now_utc = utc_now_iso()
                 cursor.execute(
-                    "INSERT INTO capital_reservations VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                    """
+                    INSERT INTO capital_reservations (
+                        reservation_id, account_id, idempotency_key, strategy_id, symbol,
+                        side, requested_notional, reserved_cash, status, created_at, updated_at
+                    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """,
                     (
                         reservation_id,
                         account_id,
                         idempotency_key,
                         strategy_id,
                         symbol,
+                        side.upper() if side else None,
                         str(requested_notional),
                         str(reserved_cash),
                         ReservationStatus.ACTIVE.value,
@@ -216,10 +242,22 @@ class CapitalReservationService:
             cursor.execute("ROLLBACK")
             return ReservationOutcome.IDEMPOTENT_REPLAY
 
-    def consume_partial(self, reservation_id: str, filled_notional: Decimal) -> Dict[str, Any]:
-        """Atomically consumes the exact filled portion of a reservation and releases the remainder.
+    def consume_partial(
+        self,
+        reservation_id: str,
+        filled_notional: Decimal,
+        is_final: bool = True,
+    ) -> Dict[str, Any]:
+        """Atomically consumes the exact filled portion of a reservation and manages remainder.
 
-        Prevents margin lockup on partial fills while ensuring exact financial reconciliation.
+        If is_final is False:
+            Keep reservation ACTIVE for remainder:
+            remaining_cash = max(Decimal("0.0"), original_reserved - consumed_cash)
+            status = ACTIVE if remaining_cash > Decimal("0.0") else CONSUMED
+            reserved_cash = remaining_cash
+            released_cash = Decimal("0.0")
+        If is_final is True:
+            status = CONSUMED, released_cash = max(Decimal("0.0"), original_reserved - consumed_cash)
         """
         if filled_notional < Decimal("0.0"):
             raise ValueError(f"Invalid filled_notional {filled_notional}: cannot be negative")
@@ -248,21 +286,32 @@ class CapitalReservationService:
             }
 
         consumed_cash = min(filled_notional, original_reserved)
-        released_cash = max(Decimal("0.0"), original_reserved - consumed_cash)
         now_utc = utc_now_iso()
+
+        if not is_final:
+            remaining_cash = max(Decimal("0.0"), original_reserved - consumed_cash)
+            status = ReservationStatus.ACTIVE if remaining_cash > Decimal("0.0") else ReservationStatus.CONSUMED
+            reserved_cash = remaining_cash
+            released_cash = Decimal("0.0")
+        else:
+            status = ReservationStatus.CONSUMED
+            released_cash = max(Decimal("0.0"), original_reserved - consumed_cash)
+            reserved_cash = consumed_cash
 
         cursor.execute(
             "UPDATE capital_reservations SET reserved_cash = ?, status = ?, updated_at = ? WHERE reservation_id = ?",
-            (str(consumed_cash), ReservationStatus.CONSUMED.value, now_utc, reservation_id),
+            (str(reserved_cash), status.value, now_utc, reservation_id),
         )
         self.conn.commit()
         logger.info(
-            "Reservation %s PARTIALLY CONSUMED: %s consumed, %s released back to cash",
-            reservation_id, consumed_cash, released_cash,
+            "Reservation %s PARTIALLY CONSUMED (is_final=%s): %s consumed, %s reserved, %s released back to cash",
+            reservation_id, is_final, consumed_cash, reserved_cash, released_cash,
         )
         return {
-            "outcome": ReservationOutcome.CONSUMED,
+            "outcome": ReservationOutcome.CONSUMED if status == ReservationStatus.CONSUMED else ReservationOutcome.RESERVED,
+            "status": status,
             "reservation_id": reservation_id,
             "consumed_cash": consumed_cash,
+            "reserved_cash": reserved_cash,
             "released_cash": released_cash,
         }

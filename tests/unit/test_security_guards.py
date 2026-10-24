@@ -138,6 +138,58 @@ class TestOrderDispatchSafetyGuard:
         with pytest.raises(SecurityInvariantViolation, match="real_money=True"):
             OrderDispatchSafetyGuard.intercept_order_intent(intent)
 
+    def test_audit_sizing_001_reject_zero_or_negative_quantity(self):
+        """AUDIT-SIZING-001: OrderDispatchSafetyGuard rejects non-positive order quantity."""
+        # Zero quantity
+        intent_zero = {
+            "order_id": "ORD-ZERO",
+            "symbol": "INFY",
+            "venue": "PAPER",
+            "is_risk_approved": True,
+            "real_money": False,
+            "quantity": 0,
+        }
+        with pytest.raises(ValueError, match="Invalid order quantity 0: Quantity must be a strictly positive integer"):
+            OrderDispatchSafetyGuard.intercept_order_intent(intent_zero)
+
+        # Negative quantity
+        intent_neg = {
+            "order_id": "ORD-NEG",
+            "symbol": "INFY",
+            "venue": "PAPER",
+            "is_risk_approved": True,
+            "real_money": False,
+            "quantity": -5,
+        }
+        with pytest.raises(ValueError, match="Invalid order quantity -5: Quantity must be a strictly positive integer"):
+            OrderDispatchSafetyGuard.intercept_order_intent(intent_neg)
+
+    def test_audit_sizing_001_reject_non_integer_quantity(self):
+        """AUDIT-SIZING-001: OrderDispatchSafetyGuard rejects non-integer quantity types."""
+        # Boolean quantity (bool is subclass of int in Python)
+        intent_bool = {
+            "order_id": "ORD-BOOL",
+            "symbol": "INFY",
+            "venue": "PAPER",
+            "is_risk_approved": True,
+            "real_money": False,
+            "quantity": True,
+        }
+        with pytest.raises(ValueError, match="Quantity must be a strictly positive integer"):
+            OrderDispatchSafetyGuard.intercept_order_intent(intent_bool)
+
+        # Float quantity
+        intent_float = {
+            "order_id": "ORD-FLOAT",
+            "symbol": "INFY",
+            "venue": "PAPER",
+            "is_risk_approved": True,
+            "real_money": False,
+            "quantity": 10.5,
+        }
+        with pytest.raises(ValueError, match="Quantity must be a strictly positive integer"):
+            OrderDispatchSafetyGuard.intercept_order_intent(intent_float)
+
 
 class TestWorkspaceContainment:
     """Tests file path boundary enforcement."""

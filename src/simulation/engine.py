@@ -103,6 +103,7 @@ class HistoricalReplayEngine:
         self.rejected_signals: int = 0
         self.unfilled_orders: int = 0
         self.partial_fills: int = 0
+        self.short_proceeds: Decimal = Decimal("0.0")
         self.equity_curve: List[Decimal] = [initial_capital]
         self.provenance_records: Dict[str, Any] = {}
 
@@ -173,8 +174,7 @@ class HistoricalReplayEngine:
                             side_is_buy=(exit_side == OrderSide.BUY),
                             order_purpose="EXIT",
                             trade_date=ts,
-                            reference_price=bar.close,
-                            tick_size=tick_size,
+                            reference_price=exit_price,
                         )
                         qty = pos["quantity"]
                         trade_gross = (exit_price - pos["entry_price"]) * Decimal(str(qty)) if pos["side"] == OrderSide.BUY else (pos["entry_price"] - exit_price) * Decimal(str(qty))
@@ -220,7 +220,9 @@ class HistoricalReplayEngine:
                         if pos["side"] == OrderSide.BUY:
                             self.cash += (Decimal(str(qty)) * exit_price) - exit_friction.total_transaction_cost - exit_friction.slippage
                         else:
-                            self.cash -= (Decimal(str(qty)) * exit_price) + exit_friction.total_transaction_cost + exit_friction.slippage
+                            # Short cover: release segregated proceeds and settle gross PnL + exit friction
+                            self.short_proceeds -= (pos["entry_price"] * Decimal(str(qty)))
+                            self.cash += trade_gross - exit_friction.total_transaction_cost - exit_friction.slippage
                         gross_realized_pnl += trade_gross
                         total_fees += exit_friction.total_transaction_cost
                         total_slippage += exit_friction.slippage
@@ -250,7 +252,18 @@ class HistoricalReplayEngine:
                         self.equity_curve.append(current_portfolio_equity)
                         continue
 
-                # Strategy evaluation if no position open
+            # 2. Strategy evaluation for candidate symbols without open positions
+            # Collects signals cross-sectionally to eliminate arbitrary symbol contention
+            candidate_entries: List[Tuple[str, MarketBar, Decimal, StrategySignal]] = []
+            for symbol, bars in market_data.items():
+                current_bars = [b for b in bars if b.timestamp_iso == ts]
+                if not current_bars:
+                    continue
+                bar = current_bars[0]
+                tick_size = HistoricalSecurityTickMaster.get_tick_metadata(
+                    symbol, trade_date=bar.timestamp_iso, reference_price=bar.close
+                ).tick_size
+
                 if symbol not in open_positions:
                     strat_id = getattr(self.strategy, "strategy_id", getattr(self.strategy, "STRATEGY_ID", ""))
                     signal = None
@@ -263,126 +276,152 @@ class HistoricalReplayEngine:
                         signal = self.strategy.evaluate(bar, symbol_history[symbol])
 
                     if signal:
-                        entry_price = quantize_order_price(
-                            signal.target_entry_price,
-                            symbol,
-                            side_is_buy=(signal.side == OrderSide.BUY),
-                            order_purpose="ENTRY",
-                            trade_date=ts,
-                            reference_price=bar.close,
-                            tick_size=tick_size,
-                        )
-                        # Position sizing: risk 2% of cash, but cap total notional at 20% of available cash
-                        risk_amount = self.cash * self.max_risk_per_trade_pct
-                        risk_per_share = abs(entry_price - signal.stop_loss)
-                        raw_qty = int(risk_amount / risk_per_share) if risk_per_share > Decimal("0.0") else 0
-                        max_capital_qty = int((self.cash * Decimal("0.20")) / entry_price)
-                        qty = max(1, min(raw_qty, max_capital_qty))
+                        candidate_entries.append((symbol, bar, tick_size, signal))
 
-                        notional = Decimal(str(qty)) * entry_price
-                        # Reserve capital atomically
-                        res = self.reservation_service.reserve_capital(
-                            reservation_id=f"RES-{uuid.uuid4().hex[:8]}",
-                            account_id="PAPER_ACC_01",
-                            idempotency_key=f"IDEM-{signal.signal_id}",
-                            strategy_id=signal.strategy_id,
-                            symbol=symbol,
-                            quantity=qty,
-                            price=entry_price,
-                            get_available_capital=lambda acc: self.cash,
-                        )
+            # Cross-sectional ranking: prioritize candidates by confidence score descending with deterministic symbol tie-breaker
+            candidate_entries.sort(key=lambda item: (-item[3].confidence_score, item[0]))
 
-                        if res["outcome"] == ReservationOutcome.RESERVED:
-                            # Order creation
-                            order_id = f"ORD-{uuid.uuid4().hex[:8]}"
-                            order = self.gateway.create_order(
-                                order_id=order_id,
-                                idempotency_key=f"IDEM-{signal.signal_id}",
-                                strategy_id=signal.strategy_id,
-                                symbol=symbol,
-                                side=signal.side,
-                                order_type=OrderType.LIMIT,
-                                quantity=qty,
-                                price=entry_price,
-                                venue="PAPER",
-                                is_risk_approved=True,
-                                trade_date=ts,
-                            )
-                            self.gateway.transition_state(order_id, OrderState.SUBMITTED, "Dispatched to paper execution simulator")
+            # 3. Position Sizing, Capital Reservation, and Execution for ranked candidates
+            for symbol, bar, tick_size, signal in candidate_entries:
+                if symbol in open_positions:
+                    continue
 
-                            # Evaluate paper fill via fill model
-                            fill_res = self.fill_model.evaluate_limit_entry(
-                                order_id=order_id,
-                                symbol=symbol,
-                                side=signal.side,
-                                quantity=qty,
-                                limit_price=entry_price,
-                                bar=bar,
-                                tick_size=tick_size,
-                            )
-                            if fill_res is None:
-                                # Limit order unfilled (market did not penetrate limit)
-                                self.gateway.transition_state(order_id, OrderState.CANCELLED, "Limit order unfilled on bar penetration check; cancelled")
-                                self.reservation_service.release_capital(res["reservation_id"])
-                                self.unfilled_orders += 1
-                                continue
+                entry_price = quantize_order_price(
+                    signal.target_entry_price,
+                    symbol,
+                    side_is_buy=(signal.side == OrderSide.BUY),
+                    order_purpose="ENTRY",
+                    trade_date=ts,
+                    reference_price=signal.target_entry_price,
+                )
+                # Dynamic position sizing (Audit Gate 1): Respect signal.position_sizing_ratio if present
+                effective_risk_pct = (
+                    signal.position_sizing_ratio
+                    if signal.position_sizing_ratio is not None and signal.position_sizing_ratio > Decimal("0.0")
+                    else self.max_risk_per_trade_pct
+                )
+                risk_amount = self.cash * effective_risk_pct
+                risk_per_share = abs(entry_price - signal.stop_loss)
+                raw_qty = int(risk_amount / risk_per_share) if risk_per_share > Decimal("0.0") else 0
+                max_capital_qty = int((self.cash * Decimal("0.20")) / entry_price)
+                calculated_qty = min(raw_qty, max_capital_qty)
 
-                            # Mark order filled on strategy if callback supported (e.g. ORB daily trade limit)
-                            if hasattr(self.strategy, "mark_order_filled"):
-                                session_date = bar.timestamp_iso[:10]
-                                self.strategy.mark_order_filled(session_date)
+                # AUDIT-SIZING-001: Strict pre-dispatch rejection when budget/capital cannot afford minimum 1 share
+                if calculated_qty <= 0:
+                    self.rejected_signals += 1
+                    continue
+                qty = calculated_qty
 
-                            if fill_res.is_partial_fill:
-                                self.partial_fills += 1
+                notional = Decimal(str(qty)) * entry_price
+                # Reserve capital atomically
+                res = self.reservation_service.reserve_capital(
+                    reservation_id=f"RES-{uuid.uuid4().hex[:8]}",
+                    account_id="PAPER_ACC_01",
+                    idempotency_key=f"IDEM-{signal.signal_id}",
+                    strategy_id=signal.strategy_id,
+                    symbol=symbol,
+                    quantity=qty,
+                    price=entry_price,
+                    get_available_capital=lambda acc: self.cash,
+                )
 
-                            filled_qty = fill_res.filled_quantity
-                            fill_price = fill_res.fill_price
-                            entry_friction = fill_res.friction
+                if res["outcome"] == ReservationOutcome.RESERVED:
+                    # Order creation
+                    order_id = f"ORD-{uuid.uuid4().hex[:8]}"
+                    order = self.gateway.create_order(
+                        order_id=order_id,
+                        idempotency_key=f"IDEM-{signal.signal_id}",
+                        strategy_id=signal.strategy_id,
+                        symbol=symbol,
+                        side=signal.side,
+                        order_type=OrderType.LIMIT,
+                        quantity=qty,
+                        price=entry_price,
+                        venue="PAPER",
+                        is_risk_approved=True,
+                        trade_date=ts,
+                    )
+                    self.gateway.transition_state(order_id, OrderState.SUBMITTED, "Dispatched to paper execution simulator")
 
-                            fill = ExecutionFill(
-                                fill_id=fill_res.fill_id,
-                                order_id=order_id,
-                                symbol=symbol,
-                                side=signal.side,
-                                quantity=filled_qty,
-                                price=fill_price,
-                                transaction_cost=entry_friction.total_transaction_cost,
-                                slippage_cost=entry_friction.slippage,
-                            )
-                            self.gateway.process_fill(fill)
+                    # Evaluate paper fill via fill model
+                    fill_res = self.fill_model.evaluate_limit_entry(
+                        order_id=order_id,
+                        symbol=symbol,
+                        side=signal.side,
+                        quantity=qty,
+                        limit_price=entry_price,
+                        bar=bar,
+                        tick_size=tick_size,
+                    )
+                    if fill_res is None:
+                        # Limit order unfilled (market did not penetrate limit)
+                        self.gateway.transition_state(order_id, OrderState.CANCELLED, "Limit order unfilled on bar penetration check; cancelled")
+                        self.reservation_service.release_capital(res["reservation_id"])
+                        self.unfilled_orders += 1
+                        continue
 
-                            actual_notional = Decimal(str(filled_qty)) * fill_price
-                            if fill_res.is_partial_fill:
-                                self.gateway.transition_state(order_id, OrderState.CANCELLED, f"Cancelled remaining unfilled {fill_res.unfilled_quantity} shares")
-                                self.reservation_service.consume_partial(res["reservation_id"], actual_notional)
+                    # Mark order filled on strategy if callback supported (e.g. ORB daily trade limit)
+                    if hasattr(self.strategy, "mark_order_filled"):
+                        session_date = bar.timestamp_iso[:10]
+                        self.strategy.mark_order_filled(session_date)
 
-                            if signal.side == OrderSide.BUY:
-                                self.cash -= (actual_notional + entry_friction.total_transaction_cost + entry_friction.slippage)
-                            else:
-                                self.cash += (actual_notional - entry_friction.total_transaction_cost - entry_friction.slippage)
-                            total_fees += entry_friction.total_transaction_cost
-                            total_slippage += entry_friction.slippage
+                    if fill_res.is_partial_fill:
+                        self.partial_fills += 1
 
-                            open_positions[symbol] = {
-                                "order_id": order_id,
-                                "reservation_id": res["reservation_id"],
-                                "side": signal.side,
-                                "quantity": filled_qty,
-                                "entry_price": fill_price,
-                                "entry_friction": entry_friction,
-                                "stop_loss": signal.stop_loss,
-                                "take_profit": signal.take_profit,
-                                "entry_time": ts,
-                            }
-                        else:
-                            self.rejected_signals += 1
+                    filled_qty = fill_res.filled_quantity
+                    fill_price = fill_res.fill_price
+                    entry_friction = fill_res.friction
 
-                symbol_history[symbol].append(bar)
+                    fill = ExecutionFill(
+                        fill_id=fill_res.fill_id,
+                        order_id=order_id,
+                        symbol=symbol,
+                        side=signal.side,
+                        quantity=filled_qty,
+                        price=fill_price,
+                        transaction_cost=entry_friction.total_transaction_cost,
+                        slippage_cost=entry_friction.slippage,
+                    )
+                    self.gateway.process_fill(fill)
+
+                    actual_notional = Decimal(str(filled_qty)) * fill_price
+                    if fill_res.is_partial_fill:
+                        self.gateway.transition_state(order_id, OrderState.CANCELLED, f"Cancelled remaining unfilled {fill_res.unfilled_quantity} shares")
+                        self.reservation_service.consume_partial(res["reservation_id"], actual_notional)
+
+                    if signal.side == OrderSide.BUY:
+                        self.cash -= (actual_notional + entry_friction.total_transaction_cost + entry_friction.slippage)
+                    else:
+                        # Segregate short proceeds: do not inflate free cash balance with sale proceeds
+                        self.short_proceeds += actual_notional
+                        self.cash -= (entry_friction.total_transaction_cost + entry_friction.slippage)
+                    total_fees += entry_friction.total_transaction_cost
+                    total_slippage += entry_friction.slippage
+
+                    open_positions[symbol] = {
+                        "order_id": order_id,
+                        "reservation_id": res["reservation_id"],
+                        "side": signal.side,
+                        "quantity": filled_qty,
+                        "entry_price": fill_price,
+                        "entry_friction": entry_friction,
+                        "stop_loss": signal.stop_loss,
+                        "take_profit": signal.take_profit,
+                        "entry_time": ts,
+                    }
+                else:
+                    self.rejected_signals += 1
+
+            # 4. Append current bars to history for all symbols on this timestamp
+            for symbol, bars in market_data.items():
+                current_bars = [b for b in bars if b.timestamp_iso == ts]
+                if current_bars:
+                    symbol_history[symbol].append(current_bars[0])
 
             # Mark-to-market portfolio equity including unrealized P&L
             unrealized_pnl = Decimal("0.0")
             for pos_sym, pos_val in open_positions.items():
-                curr_price = bar.close if pos_sym == symbol else (symbol_history[pos_sym][-1].close if symbol_history[pos_sym] else pos_val["entry_price"])
+                curr_price = symbol_history[pos_sym][-1].close if (pos_sym in symbol_history and symbol_history[pos_sym]) else pos_val["entry_price"]
                 if pos_val["side"] == OrderSide.BUY:
                     unrealized_pnl += (curr_price - pos_val["entry_price"]) * Decimal(str(pos_val["quantity"]))
                 else:
@@ -401,8 +440,9 @@ class HistoricalReplayEngine:
                 last_bar.close,
                 symbol,
                 side_is_buy=(exit_side == OrderSide.BUY),
-                order_purpose="ENTRY",
-                tick_size=eod_tick_size,
+                order_purpose="EXIT",
+                trade_date=last_bar.timestamp_iso,
+                reference_price=last_bar.close,
             )
             qty = pos["quantity"]
             trade_gross = (exit_price - pos["entry_price"]) * Decimal(str(qty)) if pos["side"] == OrderSide.BUY else (pos["entry_price"] - exit_price) * Decimal(str(qty))
@@ -445,7 +485,9 @@ class HistoricalReplayEngine:
             if pos["side"] == OrderSide.BUY:
                 self.cash += (Decimal(str(qty)) * exit_price) - exit_friction.total_transaction_cost - exit_friction.slippage
             else:
-                self.cash -= (Decimal(str(qty)) * exit_price) + exit_friction.total_transaction_cost + exit_friction.slippage
+                # Short cover: release segregated proceeds and settle gross PnL + exit friction
+                self.short_proceeds -= (pos["entry_price"] * Decimal(str(qty)))
+                self.cash += trade_gross - exit_friction.total_transaction_cost - exit_friction.slippage
             gross_realized_pnl += trade_gross
             total_fees += exit_friction.total_transaction_cost
             total_slippage += exit_friction.slippage

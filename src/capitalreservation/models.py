@@ -41,6 +41,7 @@ class CapitalReservation:
     symbol: str
     requested_notional: Decimal
     reserved_cash: Decimal
+    side: Optional[str] = None
     status: ReservationStatus = ReservationStatus.ACTIVE
     created_at_utc: str = field(default_factory=utc_now_iso)
     updated_at_utc: str = field(default_factory=utc_now_iso)
